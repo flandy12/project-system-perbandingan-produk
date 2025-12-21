@@ -17,7 +17,7 @@
 
 </head>
 
-<body class="bg-slate-50 text-slate-900 antialiased">
+<body class="bg-slate-50 text-slate-900 antialiased scroll-smooth" >
 
     <div class="max-w-7xl mx-auto px-6 pt-8">
         <x-navbar />

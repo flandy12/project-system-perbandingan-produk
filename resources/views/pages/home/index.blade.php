@@ -1,7 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <div x-data="{ open: false }">
+    <div x-data="{
+        active: 'top',
+        modalOpen: false
+    }">
+
 
         <div class="max-w-7xl mx-auto px-4">
 
@@ -12,19 +16,47 @@
            gap-3
            pb-2 mb-8 bg-slate-50 z-40">
 
-                <button class="px-4 py-2 text-sm rounded-full bg-sky-100 text-sky-700 font-medium whitespace-nowrap">
+                <button
+                    @click="
+        active = 'top';
+        document.getElementById('top-penjualan')?.scrollIntoView({ behavior: 'smooth' })
+    "
+                    :class="active === 'top'
+                        ?
+                        'bg-sky-100 text-sky-700' :
+                        'bg-white border border-slate-200'"
+                    class="px-4 py-2 text-sm rounded-full whitespace-nowrap">
                     Top Penjualan
                 </button>
 
+
                 <button
-                    class="px-4 py-2 text-sm rounded-full bg-white border border-slate-200 hover:bg-slate-50 whitespace-nowrap">
+                    @click="
+        active = 'rekomendasi';
+        document.getElementById('rekomendasi')?.scrollIntoView({ behavior: 'smooth' })
+    "
+                    :class="active === 'rekomendasi'
+                        ?
+                        'bg-sky-100 text-sky-700' :
+                        'bg-white border border-slate-200'"
+                    class="px-4 py-2 text-sm rounded-full whitespace-nowrap">
                     Rekomendasi
                 </button>
 
+
                 <button
-                    class="px-4 py-2 text-sm rounded-full bg-white border border-slate-200 hover:bg-slate-50 whitespace-nowrap">
+                    @click="
+        active = 'discount';
+        document.getElementById('discount')?.scrollIntoView({ behavior: 'smooth' })
+    "
+                    :class="active === 'discount'
+                        ?
+                        'bg-sky-100 text-sky-700' :
+                        'bg-white border border-slate-200'"
+                    class="px-4 py-2 text-sm rounded-full whitespace-nowrap">
                     Discount
                 </button>
+
 
                 <!-- Dropdown Filter -->
                 <div x-data="{ open: false }" class="relative shrink-0" x-cloak>
@@ -74,7 +106,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-                    <div @click="open = true"
+                    <div @click="modalOpen = true"
                         class="bg-white rounded-3xl p-6 shadow-md border border-sky-100
            cursor-pointer hover:shadow-lg transition">
 
@@ -115,8 +147,11 @@
             <section class="space-y-14">
 
                 <!-- TOP PENJUALAN -->
-                <div>
-                    <h2 class="text-lg font-semibold mb-4">Top Penjualan</h2>
+                <div id="top-penjualan">
+                    <div class="flex mb-4 justify-between items-center ">
+                        <h2 class="text-lg font-semibold ">Top Penjualan</h2>
+                        <p class="text-gray-500 hover:text-gray-800 cursor-pointer font-semibold">Lainnya</p>
+                    </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         @for ($i = 0; $i < 4; $i++)
                             <div class="bg-white rounded-2xl p-4 shadow-sm">
@@ -128,8 +163,11 @@
                 </div>
 
                 <!-- REKOMENDASI -->
-                <div>
-                    <h2 class="text-lg font-semibold mb-4">Rekomendasi</h2>
+                <div id="rekomendasi">
+                    <div class="flex mb-4 justify-between items-center ">
+                        <h2 class="text-lg font-semibold ">Rekomendasi</h2>
+                        <p class="text-gray-500 hover:text-gray-800 cursor-pointer font-semibold">Lainnya</p>
+                    </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         @for ($i = 0; $i < 4; $i++)
                             <div class="bg-white rounded-2xl p-4 shadow-sm">
@@ -141,8 +179,11 @@
                 </div>
 
                 <!-- DISCOUNT -->
-                <div>
-                    <h2 class="text-lg font-semibold mb-4">Discount</h2>
+                <div id="discount">
+                    <div class="flex mb-4 justify-between items-center ">
+                        <h2 class="text-lg font-semibold ">Discount</h2>
+                        <p class="text-gray-500 hover:text-gray-800 cursor-pointer font-semibold">Lainnya</p>
+                    </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         @for ($i = 0; $i < 4; $i++)
                             <div class="bg-white rounded-2xl p-4 shadow-sm">
@@ -171,7 +212,7 @@
         </div>
 
         <!-- MODAL -->
-        <div x-show="open" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+        <div  x-show="modalOpen" " x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
 
             <!-- Overlay -->
             <div @click="open = false" class="absolute inset-0 bg-black/40 backdrop-blur-sm">
@@ -182,7 +223,7 @@
 
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">STB Merah</h3>
-                    <button @click="open = false" class="text-slate-400 hover:text-slate-600">
+                    <button @click="modalOpen = false" class="text-slate-400 hover:text-slate-600">
                         ✕
                     </button>
                 </div>
