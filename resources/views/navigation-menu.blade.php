@@ -17,17 +17,17 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('user.index') }}" :active="request()->routeIs('user.index')">
+                    <x-nav-link href="{{ route('users.index') }}" :active="request()->routeIs('users.index')">
                         {{ __('User') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('role.index') }}" :active="request()->routeIs('role.index')">
+                    <x-nav-link href="{{ route('roles.index') }}" :active="request()->routeIs('roles.index')">
                         {{ __('Role') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('permission.index') }}" :active="request()->routeIs('permission.index')">
+                    <x-nav-link href="{{ route('permissions.index') }}" :active="request()->routeIs('permissions.index')">
                         {{ __('Permission') }}
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('product.index') }}" :active="request()->routeIs('product.index')">
+                    <x-nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.index')">
                         {{ __('Product') }}
                     </x-nav-link>
 
@@ -39,7 +39,7 @@
                         {{ __('Discount') }}
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('headline.index') }}" :active="request()->routeIs('headline.index')">
+                    <x-nav-link href="{{ route('headline-slide.index') }}" :active="request()->routeIs('headline-slide.index')">
                         {{ __('Headline Slider') }}
                     </x-nav-link>
 
