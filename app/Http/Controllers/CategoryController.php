@@ -2,63 +2,52 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $categories = Category::orderBy('name')->get();
+
+        return view('pages.categories.index', compact('categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'name'      => 'required|string|max:100|unique:categories,name',
+            'is_active' => 'required|boolean',
+        ]);
+
+        Category::create($data);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Kategori berhasil ditambahkan');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, Category $category)
     {
-        //
+        $data = $request->validate([
+            'name'      => 'required|string|max:100|unique:categories,name,' . $category->id,
+            'is_active' => 'required|boolean',
+        ]);
+
+        $category->update($data);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Kategori berhasil diperbarui');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy(Category $category)
     {
-        //
-    }
+        $category->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()
+            ->back()
+            ->with('success', 'Kategori berhasil dihapus');
     }
 }
