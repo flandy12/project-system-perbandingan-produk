@@ -47,7 +47,7 @@
                         <tr>
                             <th class="border px-4 py-2">Role</th>
                             <th class="border px-4 py-2">Guard</th>
-                            <th class="border px-4 py-2">Total User</th>
+                            <th class="border px-4 py-2">Permission</th>
                             <th class="border px-4 py-2">Aksi</th>
                         </tr>
                     </thead>
@@ -61,15 +61,11 @@
                                     {{ $role->guard_name }}
                                 </td>
                                 <td class="border px-4 py-2 text-center">
-                                    {{ $role->users_count }}
+                                    {{ $role->permissions->pluck('name')->join(', ') }}
                                 </td>
                                 <td class="border px-4 py-2 text-center space-x-2">
                                     <button
-                                        @click="openEdit({
-    id: {{ $role->id }},
-    name: @js($role->name),
-    permissions: @js($role->permissions->pluck('name'))
-})"
+                                        @click="openEdit({ id: {{ $role->id }}, name: @js($role->name), permissions: @js($role->permissions->pluck('name'))})"
                                         class="text-green-600">
                                         Edit
                                     </button>

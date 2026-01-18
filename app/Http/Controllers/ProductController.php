@@ -2,63 +2,103 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductSpecification;
+use App\Models\SpecificationGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $products = Product::with(['category', 'finalScore'])
+            ->latest()
+            ->paginate(15);
+        $categories = Category::all();
+
+        $specificationGroups = SpecificationGroup::with('specifications')
+            ->orderBy('name')
+            ->get();
+
+        return view('pages.products.index', compact('products', 'categories', 'specificationGroups'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'specifications' => 'array',
+            'specifications.*.id' => 'exists:specifications,id',
+            'specifications.*.value' => 'required'
+        ]);
+
+        DB::transaction(function () use ($request) {
+
+            $product = Product::create([
+                'title' => $request->title,
+                'description' => $request->description,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'category_id' => $request->category_id,
+                'production_year' => $request->production_year,
+                'status' => 'disable'
+            ]);
+
+            foreach ($request->specifications ?? [] as $spec) {
+                ProductSpecification::create([
+                    'product_id' => $product->id,
+                    'specification_id' => $spec['id'],
+                    'value' => $spec['value']
+                ]);
+            }
+        });
+
+        return response()->json(['message' => 'Product created'], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Product $product)
     {
-        //
+        return $product->load([
+            'category',
+            'specifications.specification.group',
+            'finalScore'
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Product $product)
     {
-        //
+        $request->validate([
+            'title' => 'sometimes|required',
+            'price' => 'sometimes|required|numeric|min:0',
+            'stock' => 'sometimes|required|integer|min:0',
+        ]);
+
+        $product->update($request->only([
+            'title',
+            'description',
+            'price',
+            'stock',
+            'status'
+        ]));
+
+        return response()->json(['message' => 'Product updated']);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function activate(Product $product)
     {
-        //
-    }
+        if ($product->finalScore === null) {
+            return response()->json([
+                'message' => 'Product score not calculated'
+            ], 422);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $product->update(['status' => 'active']);
+
+        return response()->json(['message' => 'Product activated']);
     }
 }
