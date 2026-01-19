@@ -1,14 +1,14 @@
 <x-app-layout>
-    <div x-data="specCrud()" class="py-6">
+    <div x-data="productSpecScoreCrud()" class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 rounded shadow">
 
                 <!-- HEADER -->
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold">Specification</h2>
+                    <h2 class="text-xl font-semibold">Product Specification Scores</h2>
 
                     <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
-                        Tambah Specification
+                        Tambah Score
                     </button>
                 </div>
 
@@ -17,55 +17,55 @@
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="border px-4 py-2">No</th>
-                            <th class="border px-4 py-2">Nama</th>
-                            <th class="border px-4 py-2">Group</th>
-                            <th class="border px-4 py-2 text-center">Tipe Data</th>
-                            <th class="border px-4 py-2 text-center">Unit</th>
+                            <th class="border px-4 py-2">Produk</th>
+                            <th class="border px-4 py-2">Specification</th>
+                            <th class="border px-4 py-2 text-center">Raw Value</th>
+                            <th class="border px-4 py-2 text-center">Normalized</th>
                             <th class="border px-4 py-2 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($specifications as $spec)
+                        @forelse ($productSpecificationScores as $item)
                             <tr>
                                 <td class="border px-4 py-2 font-medium">
                                     {{ $loop->iteration }}
                                 </td>
                                 <td class="border px-4 py-2 font-medium">
-                                    {{ $spec->name }}
+                                    {{ $item->product->title ?? '-' }}
                                 </td>
 
                                 <td class="border px-4 py-2">
-                                    {{ $spec->group->name ?? '-' }}
+                                    {{ $item->specification->name ?? '-' }}
                                 </td>
 
                                 <td class="border px-4 py-2 text-center">
-                                    <span class="px-2 py-1 text-xs rounded bg-gray-200">
-                                        {{ ucfirst($spec->data_type) }}
+                                    {{ number_format($item->raw_value, 2) }}
+                                </td>
+
+                                <td class="border px-4 py-2 text-center">
+                                    <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
+                                        {{ number_format($item->normalized_score, 2) }}
                                     </span>
-                                </td>
-
-                                <td class="border px-4 py-2 text-center">
-                                    {{ $spec->unit ?? '-' }}
                                 </td>
 
                                 <td class="border px-4 py-2 text-center space-x-2">
                                     <button
                                         @click="openEdit({
-                                            id: {{ $spec->id }},
-                                            name: @js($spec->name),
-                                            group_id: {{ $spec->specification_group_id }},
-                                            data_type: @js($spec->data_type),
-                                            unit: @js($spec->unit)
+                                            id: {{ $item->id }},
+                                            product_id: {{ $item->product_id }},
+                                            specification_id: {{ $item->specification_id }},
+                                            raw_value: @js($item->raw_value),
+                                            normalized_score: @js($item->normalized_score)
                                         })"
                                         class="text-green-600">
                                         Edit
                                     </button>
 
-                                    <form action="{{ route('specifications.destroy', $spec) }}" method="POST"
-                                        class="inline">
+                                    <form action="{{ route('product-specification-scores.destroy', $item) }}"
+                                        method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button onclick="return confirm('Hapus specification ini?')"
+                                        <button onclick="return confirm('Hapus score specification ini?')"
                                             class="text-red-600">
                                             Delete
                                         </button>
@@ -75,7 +75,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="text-center py-6 text-gray-500">
-                                    Belum ada specification
+                                    Belum ada score specification
                                 </td>
                             </tr>
                         @endforelse
@@ -84,7 +84,7 @@
 
                 <!-- PAGINATION -->
                 <div class="mt-4">
-                    {{ $specifications->links() }}
+                    {{ $productSpecificationScores->links() }}
                 </div>
 
             </div>
@@ -94,14 +94,14 @@
         <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
             <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded">
 
-                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Specification' : 'Tambah Specification'">
+                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Score' : 'Tambah Score'">
                 </h3>
 
                 <form
                     :action="isEdit
                         ?
-                        `/specifications/${form.id}` :
-                        `{{ route('specifications.store') }}`"
+                        `/product-specification-scores/${form.id}` :
+                        `{{ route('product-specification-scores.store') }}`"
                     method="POST" class="space-y-4">
 
                     @csrf
@@ -110,28 +110,35 @@
                         <input type="hidden" name="_method" value="PUT">
                     </template>
 
-                    <input type="text" name="name" x-model="form.name" class="w-full border rounded px-3 py-2"
-                        placeholder="Nama Specification" required>
-
-                    <select name="specification_group_id" x-model="form.group_id"
-                        class="w-full border rounded px-3 py-2" required>
-                        <option value="">-- Pilih Group --</option>
-                        @foreach ($groups as $group)
-                            <option value="{{ $group->id }}">
-                                {{ $group->name }}
+                    <!-- PRODUCT -->
+                    <select name="product_id" x-model="form.product_id" class="w-full border rounded px-3 py-2" required
+                        :disabled="isEdit">
+                        <option value="">-- Pilih Produk --</option>
+                        @foreach ($products as $product)
+                            <option value="{{ $product->id }}">
+                                {{ $product->title }}
                             </option>
                         @endforeach
                     </select>
 
-                    <select name="data_type" x-model="form.data_type" class="w-full border rounded px-3 py-2" required>
-                        <option value="">-- Tipe Data --</option>
-                        <option value="numeric">Numeric</option>
-                        <option value="boolean">Boolean</option>
-                        <option value="text">Text</option>
+                    <!-- SPECIFICATION -->
+                    <select name="specification_id" x-model="form.specification_id"
+                        class="w-full border rounded px-3 py-2" required :disabled="isEdit">
+                        <option value="">-- Pilih Specification --</option>
+                        @foreach ($specifications as $spec)
+                            <option value="{{ $spec->id }}">
+                                {{ $spec->name }}
+                            </option>
+                        @endforeach
                     </select>
 
-                    <input type="text" name="unit" x-model="form.unit" class="w-full border rounded px-3 py-2"
-                        placeholder="Unit (opsional)">
+                    <!-- RAW VALUE -->
+                    <input type="number" step="0.01" name="raw_value" x-model="form.raw_value"
+                        class="w-full border rounded px-3 py-2" placeholder="Raw Value" required>
+
+                    <!-- NORMALIZED SCORE -->
+                    <input type="number" step="0.01" name="normalized_score" x-model="form.normalized_score"
+                        class="w-full border rounded px-3 py-2" placeholder="Normalized Score (0–100)" required>
 
                     <div class="flex justify-end gap-3">
                         <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
@@ -149,33 +156,33 @@
 
     <!-- ALPINE -->
     <script>
-        function specCrud() {
+        function productSpecScoreCrud() {
             return {
                 open: false,
                 isEdit: false,
                 form: {
                     id: null,
-                    name: '',
-                    group_id: '',
-                    data_type: '',
-                    unit: ''
+                    product_id: '',
+                    specification_id: '',
+                    raw_value: '',
+                    normalized_score: ''
                 },
 
                 openCreate() {
                     this.isEdit = false
                     this.form = {
                         id: null,
-                        name: '',
-                        group_id: '',
-                        data_type: '',
-                        unit: ''
+                        product_id: '',
+                        specification_id: '',
+                        raw_value: '',
+                        normalized_score: ''
                     }
                     this.open = true
                 },
 
-                openEdit(spec) {
+                openEdit(data) {
                     this.isEdit = true
-                    this.form = spec
+                    this.form = data
                     this.open = true
                 },
 

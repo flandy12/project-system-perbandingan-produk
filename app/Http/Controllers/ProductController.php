@@ -63,11 +63,19 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        return $product->load([
-            'category',
-            'specifications.specification.group',
-            'finalScore'
-        ]);
+       
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Product deleted');
+    }
+
+    public function destroy(Product $product)
+    {
+        $product->delete();
+
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Product deleted');
     }
 
     public function update(Request $request, Product $product)

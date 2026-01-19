@@ -7,8 +7,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold">Product Specifications</h2>
 
-                    <button @click="openCreate()"
-                        class="px-4 py-2 bg-blue-600 text-white rounded">
+                    <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
                         Tambah Specification
                     </button>
                 </div>
@@ -17,6 +16,7 @@
                 <table class="min-w-full border">
                     <thead class="bg-gray-100">
                         <tr>
+                            <th class="border px-4 py-2">No</th>
                             <th class="border px-4 py-2">Produk</th>
                             <th class="border px-4 py-2">Specification</th>
                             <th class="border px-4 py-2 text-center">Value</th>
@@ -26,6 +26,9 @@
                     <tbody>
                         @forelse ($productSpecifications as $item)
                             <tr>
+                                <td class="border px-4 py-2 font-medium">
+                                    {{ $loop->iteration }}
+                                </td>
                                 <td class="border px-4 py-2 font-medium">
                                     {{ $item->product->title ?? '-' }}
                                 </td>
@@ -50,13 +53,11 @@
                                         Edit
                                     </button>
 
-                                    <form action="{{ route('product-specifications.destroy', $item) }}"
-                                        method="POST"
+                                    <form action="{{ route('product-specifications.destroy', $item) }}" method="POST"
                                         class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button
-                                            onclick="return confirm('Hapus specification produk ini?')"
+                                        <button onclick="return confirm('Hapus specification produk ini?')"
                                             class="text-red-600">
                                             Delete
                                         </button>
@@ -65,8 +66,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4"
-                                    class="text-center py-6 text-gray-500">
+                                <td colspan="4" class="text-center py-6 text-gray-500">
                                     Belum ada product specification
                                 </td>
                             </tr>
@@ -83,10 +83,8 @@
         </div>
 
         <!-- MODAL -->
-        <div x-show="open" x-cloak
-            class="fixed inset-0 bg-black/50 flex items-center justify-center">
-            <div @click.away="closeModal()"
-                class="bg-white w-full max-w-md p-6 rounded">
+        <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
+            <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded">
 
                 <h3 class="text-lg font-semibold mb-4"
                     x-text="isEdit ? 'Edit Product Specification' : 'Tambah Product Specification'">
@@ -94,10 +92,10 @@
 
                 <form
                     :action="isEdit
-                        ? `/product-specifications/${form.id}`
-                        : `{{ route('product-specifications.store') }}`"
-                    method="POST"
-                    class="space-y-4">
+                        ?
+                        `/product-specifications/${form.id}` :
+                        `{{ route('product-specifications.store') }}`"
+                    method="POST" class="space-y-4">
 
                     @csrf
 
@@ -106,10 +104,7 @@
                     </template>
 
                     <!-- PRODUCT -->
-                    <select name="product_id"
-                        x-model="form.product_id"
-                        class="w-full border rounded px-3 py-2"
-                        required
+                    <select name="product_id" x-model="form.product_id" class="w-full border rounded px-3 py-2" required
                         :disabled="isEdit">
                         <option value="">-- Pilih Produk --</option>
                         @foreach ($products as $product)
@@ -120,11 +115,8 @@
                     </select>
 
                     <!-- SPECIFICATION -->
-                    <select name="specification_id"
-                        x-model="form.specification_id"
-                        class="w-full border rounded px-3 py-2"
-                        required
-                        :disabled="isEdit">
+                    <select name="specification_id" x-model="form.specification_id"
+                        class="w-full border rounded px-3 py-2" required :disabled="isEdit">
                         <option value="">-- Pilih Specification --</option>
                         @foreach ($specifications as $spec)
                             <option value="{{ $spec->id }}">
@@ -134,22 +126,15 @@
                     </select>
 
                     <!-- VALUE -->
-                    <input type="text"
-                        name="value"
-                        x-model="form.value"
-                        class="w-full border rounded px-3 py-2"
-                        placeholder="Value"
-                        required>
+                    <input type="text" name="value" x-model="form.value" class="w-full border rounded px-3 py-2"
+                        placeholder="Value" required>
 
                     <div class="flex justify-end gap-3">
-                        <button type="button"
-                            @click="closeModal()"
-                            class="px-4 py-2 border rounded">
+                        <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
                             Batal
                         </button>
 
-                        <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
                             Simpan
                         </button>
                     </div>

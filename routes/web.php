@@ -3,11 +3,15 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\HeadlineSliderController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductFinalScoreController;
 use App\Http\Controllers\ProductSpecificationController;
+use App\Http\Controllers\ProductSpecificationScoreController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\ScoreWeightController;
 use App\Http\Controllers\SpecificationController;
 use App\Http\Controllers\SpecificationGroupController;
 use App\Http\Controllers\SpecificationScoreController;
@@ -15,9 +19,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Role;
 
-Route::get('/', function () {
-    return view('pages.home.index');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware([
     'auth:sanctum',
@@ -47,10 +49,12 @@ Route::middleware([
     Route::resource('category', CategoryController::class);
     Route::resource('discount', DiscountController::class);
 
-    Route::resource('headline-slide', HeadlineSliderController::class );
-    Route::resource('specification-groups', SpecificationGroupController::class );
-    Route::resource('specification-scores', SpecificationScoreController::class );
+    Route::resource('headline-slide', HeadlineSliderController::class);
+    Route::resource('specification-groups', SpecificationGroupController::class);
+    Route::resource('specification-scores', SpecificationScoreController::class);
     Route::resource('specifications', SpecificationController::class);
-    Route::resource('product-specifications', ProductSpecificationController::class );
+    Route::resource('product-specifications', ProductSpecificationController::class);
+    Route::resource('product-specification-scores', ProductSpecificationScoreController::class);
+    Route::resource('score-weights', ScoreWeightController::class);
+    Route::resource('product-final-scores', ProductFinalScoreController::class);
 });
-

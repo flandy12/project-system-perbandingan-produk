@@ -1,14 +1,14 @@
 <x-app-layout>
-    <div x-data="specCrud()" class="py-6">
+    <div x-data="productFinalScoreCrud()" class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 rounded shadow">
 
                 <!-- HEADER -->
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold">Specification</h2>
+                    <h2 class="text-xl font-semibold">Product Final Scores</h2>
 
                     <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
-                        Tambah Specification
+                        Hitung / Tambah Score
                     </button>
                 </div>
 
@@ -17,55 +17,63 @@
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="border px-4 py-2">No</th>
-                            <th class="border px-4 py-2">Nama</th>
-                            <th class="border px-4 py-2">Group</th>
-                            <th class="border px-4 py-2 text-center">Tipe Data</th>
-                            <th class="border px-4 py-2 text-center">Unit</th>
+                            <th class="border px-4 py-2">Produk</th>
+                            <th class="border px-4 py-2 text-center">Specification</th>
+                            <th class="border px-4 py-2 text-center">Click</th>
+                            <th class="border px-4 py-2 text-center">Sales</th>
+                            <th class="border px-4 py-2 text-center">Final Score</th>
+                            <th class="border px-4 py-2 text-center">Calculated At</th>
                             <th class="border px-4 py-2 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($specifications as $spec)
+                        @forelse ($scores as $item)
                             <tr>
                                 <td class="border px-4 py-2 font-medium">
                                     {{ $loop->iteration }}
                                 </td>
                                 <td class="border px-4 py-2 font-medium">
-                                    {{ $spec->name }}
-                                </td>
-
-                                <td class="border px-4 py-2">
-                                    {{ $spec->group->name ?? '-' }}
+                                    {{ $item->product->title ?? '-' }}
                                 </td>
 
                                 <td class="border px-4 py-2 text-center">
-                                    <span class="px-2 py-1 text-xs rounded bg-gray-200">
-                                        {{ ucfirst($spec->data_type) }}
-                                    </span>
+                                    {{ number_format($item->specification_score, 2) }}
                                 </td>
 
                                 <td class="border px-4 py-2 text-center">
-                                    {{ $spec->unit ?? '-' }}
+                                    {{ number_format($item->click_score, 2) }}
+                                </td>
+
+                                <td class="border px-4 py-2 text-center">
+                                    {{ number_format($item->sales_score, 2) }}
+                                </td>
+
+                                <td class="border px-4 py-2 text-center font-semibold">
+                                    {{ number_format($item->final_score, 2) }}
+                                </td>
+
+                                <td class="border px-4 py-2 text-center text-sm text-gray-600">
+                                    {{ $item->calculated_at?->format('d M Y H:i') }}
                                 </td>
 
                                 <td class="border px-4 py-2 text-center space-x-2">
                                     <button
                                         @click="openEdit({
-                                            id: {{ $spec->id }},
-                                            name: @js($spec->name),
-                                            group_id: {{ $spec->specification_group_id }},
-                                            data_type: @js($spec->data_type),
-                                            unit: @js($spec->unit)
+                                            id: {{ $item->id }},
+                                            product_id: {{ $item->product_id }},
+                                            specification_score: @js($item->specification_score),
+                                            click_score: @js($item->click_score),
+                                            sales_score: @js($item->sales_score)
                                         })"
                                         class="text-green-600">
                                         Edit
                                     </button>
 
-                                    <form action="{{ route('specifications.destroy', $spec) }}" method="POST"
+                                    <form action="{{ route('product-final-scores.destroy', $item) }}" method="POST"
                                         class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button onclick="return confirm('Hapus specification ini?')"
+                                        <button onclick="return confirm('Hapus final score produk ini?')"
                                             class="text-red-600">
                                             Delete
                                         </button>
@@ -74,8 +82,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-6 text-gray-500">
-                                    Belum ada specification
+                                <td colspan="7" class="text-center py-6 text-gray-500">
+                                    Belum ada final score produk
                                 </td>
                             </tr>
                         @endforelse
@@ -84,7 +92,7 @@
 
                 <!-- PAGINATION -->
                 <div class="mt-4">
-                    {{ $specifications->links() }}
+                    {{ $scores->links() }}
                 </div>
 
             </div>
@@ -94,14 +102,14 @@
         <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
             <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded">
 
-                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Specification' : 'Tambah Specification'">
+                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Final Score' : 'Tambah Final Score'">
                 </h3>
 
                 <form
                     :action="isEdit
                         ?
-                        `/specifications/${form.id}` :
-                        `{{ route('specifications.store') }}`"
+                        `/product-final-scores/${form.id}` :
+                        `{{ route('product-final-scores.store') }}`"
                     method="POST" class="space-y-4">
 
                     @csrf
@@ -110,28 +118,28 @@
                         <input type="hidden" name="_method" value="PUT">
                     </template>
 
-                    <input type="text" name="name" x-model="form.name" class="w-full border rounded px-3 py-2"
-                        placeholder="Nama Specification" required>
-
-                    <select name="specification_group_id" x-model="form.group_id"
-                        class="w-full border rounded px-3 py-2" required>
-                        <option value="">-- Pilih Group --</option>
-                        @foreach ($groups as $group)
-                            <option value="{{ $group->id }}">
-                                {{ $group->name }}
+                    <!-- PRODUCT -->
+                    <select name="product_id" x-model="form.product_id" class="w-full border rounded px-3 py-2" required
+                        :disabled="isEdit">
+                        <option value="">-- Pilih Produk --</option>
+                        @foreach ($products as $product)
+                            <option value="{{ $product->id }}">
+                                {{ $product->title }}
                             </option>
                         @endforeach
                     </select>
 
-                    <select name="data_type" x-model="form.data_type" class="w-full border rounded px-3 py-2" required>
-                        <option value="">-- Tipe Data --</option>
-                        <option value="numeric">Numeric</option>
-                        <option value="boolean">Boolean</option>
-                        <option value="text">Text</option>
-                    </select>
+                    <!-- SPEC SCORE -->
+                    <input type="number" step="0.01" name="specification_score" x-model="form.specification_score"
+                        class="w-full border rounded px-3 py-2" placeholder="Specification Score" required>
 
-                    <input type="text" name="unit" x-model="form.unit" class="w-full border rounded px-3 py-2"
-                        placeholder="Unit (opsional)">
+                    <!-- CLICK SCORE -->
+                    <input type="number" step="0.01" name="click_score" x-model="form.click_score"
+                        class="w-full border rounded px-3 py-2" placeholder="Click Score" required>
+
+                    <!-- SALES SCORE -->
+                    <input type="number" step="0.01" name="sales_score" x-model="form.sales_score"
+                        class="w-full border rounded px-3 py-2" placeholder="Sales Score" required>
 
                     <div class="flex justify-end gap-3">
                         <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
@@ -149,33 +157,33 @@
 
     <!-- ALPINE -->
     <script>
-        function specCrud() {
+        function productFinalScoreCrud() {
             return {
                 open: false,
                 isEdit: false,
                 form: {
                     id: null,
-                    name: '',
-                    group_id: '',
-                    data_type: '',
-                    unit: ''
+                    product_id: '',
+                    specification_score: '',
+                    click_score: '',
+                    sales_score: ''
                 },
 
                 openCreate() {
                     this.isEdit = false
                     this.form = {
                         id: null,
-                        name: '',
-                        group_id: '',
-                        data_type: '',
-                        unit: ''
+                        product_id: '',
+                        specification_score: '',
+                        click_score: '',
+                        sales_score: ''
                     }
                     this.open = true
                 },
 
-                openEdit(spec) {
+                openEdit(data) {
                     this.isEdit = true
-                    this.form = spec
+                    this.form = data
                     this.open = true
                 },
 

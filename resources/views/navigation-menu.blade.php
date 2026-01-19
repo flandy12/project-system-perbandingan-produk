@@ -82,7 +82,9 @@
                                 <x-dropdown-link href="{{ route('product-specifications.index') }}">
                                     {{ __('Product Specifications') }}
                                 </x-dropdown-link>
-
+                                <x-dropdown-link href="{{ route('product-specification-scores.index') }}">
+                                    {{ __('Product Specification Scores') }}
+                                </x-dropdown-link>
                             </x-slot>
 
                         </x-dropdown>

@@ -22,6 +22,13 @@ class SpecificationController extends Controller
         return view('pages.specifications.index', compact('specifications', 'groups'));
     }
 
+    public function show(Specification $specification)
+    {
+          return redirect()
+            ->route('specifications.index')
+            ->with('success', 'Specification berhasil ditambahkan');
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -65,10 +72,10 @@ class SpecificationController extends Controller
      */
     public function destroy(Specification $specification)
     {
-        // Optional safety check:
-        if ($specification->productSpecifications()->exists()) {
-            return back()->with('error', 'Specification masih digunakan oleh produk');
-        }
+        // // Optional safety check:
+        // if ($specification->productSpecifications()->exists()) {
+        //     return back()->with('error', 'Specification masih digunakan oleh produk');
+        // }
 
         $specification->delete();
 
