@@ -31,6 +31,7 @@ class ProductController extends Controller
             'title' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'category_id' => 'required|exists:categories,id',
             'specifications' => 'array',
             'specifications.*.id' => 'exists:specifications,id',
@@ -39,6 +40,18 @@ class ProductController extends Controller
 
         DB::transaction(function () use ($request) {
 
+            // =============================
+            // HANDLE IMAGE UPLOAD
+            // =============================
+            $imagePath = null;
+
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store(
+                    'products',
+                    'public'
+                );
+            }
+
             $product = Product::create([
                 'title' => $request->title,
                 'description' => $request->description,
@@ -46,6 +59,7 @@ class ProductController extends Controller
                 'stock' => $request->stock,
                 'category_id' => $request->category_id,
                 'production_year' => $request->production_year,
+                'image' => $imagePath, // 🔥 SIMPAN PATH IMAGE
                 'status' => 'disable'
             ]);
 
@@ -57,13 +71,14 @@ class ProductController extends Controller
                 ]);
             }
         });
-
-        return response()->json(['message' => 'Product created'], 201);
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Product deleted');
     }
 
     public function show(Product $product)
     {
-       
+
         return redirect()
             ->route('products.index')
             ->with('success', 'Product deleted');
@@ -80,21 +95,37 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $request->validate([
-            'title' => 'sometimes|required',
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
             'price' => 'sometimes|required|numeric|min:0',
             'stock' => 'sometimes|required|integer|min:0',
+            'status' => 'sometimes|in:enable,disable',
+
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $product->update($request->only([
-            'title',
-            'description',
-            'price',
-            'stock',
-            'status'
-        ]));
+        DB::transaction(function () use ($validated, $request, $product) {
 
-        return response()->json(['message' => 'Product updated']);
+            // Handle image update
+            if ($request->hasFile('image')) {
+
+                // Hapus image lama jika ada
+                if ($product->image && Storage::disk('public')->exists($product->image)) {
+                    Storage::disk('public')->delete($product->image);
+                }
+
+                // Upload image baru
+                $validated['image'] = $request->file('image')
+                    ->store('products', 'public');
+            }
+
+            $product->update($validated);
+        });
+
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Product berhasil diperbarui');
     }
 
     public function activate(Product $product)

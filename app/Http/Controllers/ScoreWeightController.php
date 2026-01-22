@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 
 class ScoreWeightController extends Controller
 {
-     /**
+    /**
      * Display a listing of the resource.
      */
     public function index()
@@ -24,14 +24,28 @@ class ScoreWeightController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Ambil input mentah dulu
+        $input = $request->all();
+
+        // Ganti koma dengan titik di 'weight'
+        if (isset($input['weight'])) {
+            $input['weight'] = str_replace(',', '.', $input['weight']);
+        }
+
+        // Validasi
+        $validated = validator($input, [
             'key' => ['required', 'string', 'max:255', 'unique:score_weights,key'],
             'weight' => ['required', 'numeric', 'min:0', 'max:1'],
-        ]);
+        ])->validate();
 
+        // Cast ke float
+        $validated['weight'] = (float) $validated['weight'];
+
+        // Simpan dengan transaction
         DB::transaction(function () use ($validated) {
             ScoreWeight::create($validated);
 
+            // Validasi total weight hanya jika total > 0
             $this->validateTotalWeight();
         });
 
@@ -39,6 +53,7 @@ class ScoreWeightController extends Controller
             ->back()
             ->with('success', 'Score weight berhasil ditambahkan.');
     }
+
 
     /**
      * Update the specified resource.
@@ -73,6 +88,8 @@ class ScoreWeightController extends Controller
     {
         DB::transaction(function () use ($scoreWeight) {
             $scoreWeight->delete();
+
+            // Nonaktifkan exception saat hapus, biar bisa hapus semua record dulu
             $this->validateTotalWeight(false);
         });
 
@@ -87,14 +104,27 @@ class ScoreWeightController extends Controller
     protected function validateTotalWeight(bool $throwException = true): void
     {
         $total = ScoreWeight::sum('weight');
+        $totalRounded = round($total, 3);
+        $epsilon = 0.0001; // toleransi floating point
 
-        if (round($total, 3) !== 1.000) {
+        // Jika tabel kosong atau total = 0, jangan error
+        if ($totalRounded <= 0) {
+            return;
+        }
+
+        // Jika total melebihi 1.000 → tetap error
+        if ($totalRounded - 1.000 > $epsilon) {
             if ($throwException) {
                 abort(
                     422,
-                    'Total weight harus bernilai 1.000. Total saat ini: ' . number_format($total, 3)
+                    'Total weight tidak boleh lebih dari 1.000. Total saat ini: ' . number_format($totalRounded, 3)
                 );
             }
+        }
+
+        // Jika total < 1.000 → boleh, tidak abort, tapi bisa kasih warning
+        if ($totalRounded < 1.000 - $epsilon) {
+            session()->flash('warning', 'Total weight saat ini: ' . number_format($totalRounded, 3) . '. Total belum 1.000.');
         }
     }
 }

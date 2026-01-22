@@ -27,14 +27,14 @@
                     <tbody>
                         @forelse ($specifications as $spec)
                             <tr>
-                                <td class="border px-4 py-2 font-medium">
+                                <td class="border px-4 py-2 font-medium text-center">
                                     {{ $loop->iteration }}
                                 </td>
-                                <td class="border px-4 py-2 font-medium">
+                                <td class="border px-4 py-2 font-medium text-center">
                                     {{ $spec->name }}
                                 </td>
 
-                                <td class="border px-4 py-2">
+                                <td class="border px-4 py-2 text-center">
                                     {{ $spec->group->name ?? '-' }}
                                 </td>
 

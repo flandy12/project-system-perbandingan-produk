@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('score_weights', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique(); // specification, click, sales
-            $table->decimal('weight', 4, 3); // total = 1.000
+        $table->decimal('weight', 4, 3); // total = 1.000
             $table->timestamps();
         });
     }

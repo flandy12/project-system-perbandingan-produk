@@ -14,7 +14,7 @@
                 </div>
 
                 <!-- TABLE -->
-                <table class="min-w-full border">
+                <table class="min-w-full border text-center">
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="border px-4 py-2">No</th>
@@ -26,10 +26,10 @@
                     <tbody>
                         @forelse ($groups as $group)
                             <tr>
-                                <td class="border px-4 py-2 font-medium">
+                                <td class="border px-4 py-2 font-medium text-center">
                                     {{ $loop->iteration }}
                                 </td>
-                                <td class="border px-4 py-2 font-medium">
+                                <td class="border px-4 py-2 font-medium text-center">
                                     {{ $group->name }}
                                 </td>
 

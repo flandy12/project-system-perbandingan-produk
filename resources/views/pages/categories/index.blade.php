@@ -13,9 +13,12 @@
                 </div>
 
                 <!-- TABLE -->
-                <table class="min-w-full border text-sm">
+                <table class="min-w-full border text-sm text-center">
                     <thead class="bg-gray-100">
                         <tr>
+                            <th class="border px-3 py-2">
+                               No
+                            </th>
                             <th class="border px-3 py-2">Nama</th>
                             <th class="border px-3 py-2">Status</th>
                             <th class="border px-3 py-2">Aksi</th>
@@ -24,7 +27,10 @@
                     <tbody>
                         @foreach ($categories as $category)
                             <tr>
-                                <td class="border px-3 py-2 font-semibold">
+                                <td class="border px-4 py-2 font-medium text-center">
+                                    {{ $loop->iteration }}
+                                </td>
+                                <td class="border px-3 py-2 font-semibold text-center">
                                     {{ $category->name }}
                                 </td>
 

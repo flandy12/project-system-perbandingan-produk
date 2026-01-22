@@ -38,15 +38,13 @@
                     <tbody>
                         @forelse ($weights as $item)
                             <tr>
-                                <td class="border px-4 py-2 font-medium">
-                                    {{ $loop->iteration }}
-                            </td>
+                                <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
+                                <td class="border px-4 py-2 text-left">{{ $item->key }}</td>
                                 <td class="border px-4 py-2 text-center">
                                     <span class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700">
                                         {{ number_format($item->weight, 3) }}
                                     </span>
                                 </td>
-
                                 <td class="border px-4 py-2 text-center space-x-2">
                                     <button
                                         @click="openEdit({
@@ -54,16 +52,15 @@
                                             key: @js($item->key),
                                             weight: @js($item->weight)
                                         })"
-                                        class="text-green-600">
+                                        class="text-green-600 font-semibold">
                                         Edit
                                     </button>
 
-                                    <form action="{{ route('score-weights.destroy', $item) }}" method="POST"
-                                        class="inline">
+                                    <form action="{{ route('score-weights.destroy', $item) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
 
-                                        <button onclick="return confirm('Hapus weight ini?')" class="text-red-600">
+                                        <button onclick="return confirm('Hapus weight ini?')" class="text-red-600 font-semibold">
                                             Delete
                                         </button>
                                     </form>
@@ -71,7 +68,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="text-center py-6 text-gray-500">
+                                <td colspan="4" class="text-center py-6 text-gray-500">
                                     Data score weight belum tersedia
                                 </td>
                             </tr>
@@ -81,13 +78,11 @@
                     <!-- TOTAL -->
                     <tfoot class="bg-gray-100 font-semibold">
                         <tr>
-                            <td class="border px-4 py-2 text-right">
-                                Total
-                            </td>
+                            <td colspan="2" class="border px-4 py-2 text-right">Total</td>
                             <td class="border px-4 py-2 text-center">
                                 {{ number_format($weights->sum('weight'), 3) }}
                             </td>
-                            <td class="border"></td>
+                            <td class="border px-4 py-2"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -96,20 +91,14 @@
         </div>
 
         <!-- MODAL -->
-        <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
+        <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded shadow-lg">
 
-            <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded">
-
-                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Weight' : 'Tambah Weight'">
-                </h3>
+                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Weight' : 'Tambah Weight'"></h3>
 
                 <form
-                    :action="isEdit
-                        ?
-                        `/score-weights/${form.id}` :
-                        `{{ route('score-weights.store') }}`"
+                    :action="isEdit ? `/score-weights/${form.id}` : `{{ route('score-weights.store') }}`"
                     method="POST" class="space-y-4">
-
                     @csrf
 
                     <template x-if="isEdit">
@@ -153,17 +142,13 @@
 
                 openCreate() {
                     this.isEdit = false
-                    this.form = {
-                        id: null,
-                        key: '',
-                        weight: ''
-                    }
+                    this.form = { id: null, key: '', weight: '' }
                     this.open = true
                 },
 
                 openEdit(data) {
                     this.isEdit = true
-                    this.form = data
+                    this.form = { ...data }
                     this.open = true
                 },
 

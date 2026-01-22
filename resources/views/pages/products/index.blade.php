@@ -1,46 +1,43 @@
 <x-app-layout>
-    <div
-        x-data="{
-            open: {{ $errors->any() ? 'true' : 'false' }},
-            showErrors: {{ $errors->any() ? 'true' : 'false' }},
-            isEdit: {{ old('_method') === 'PUT' ? 'true' : 'false' }},
-            form: {
-                id: '{{ old('id') }}',
-                title: '{{ old('title') }}',
-                price: '{{ old('price') }}',
-                stock: '{{ old('stock') }}',
-                category_id: '{{ old('category_id') }}',
-                specifications: @json(old('specifications', []))
-            },
-
-            openCreate() {
-                this.isEdit = false
-                this.showErrors = false
-                this.form = {
-                    id: null,
-                    title: '',
-                    price: '',
-                    stock: '',
-                    category_id: '',
-                    specifications: []
-                }
-                this.open = true
-            },
-
-            openEdit(product) {
-                this.isEdit = true
-                this.showErrors = false
-                this.form = product
-                this.open = true
-            },
-
-            closeModal() {
-                this.open = false
-                this.showErrors = false
+    <div x-data="{
+        open: {{ $errors->any() ? 'true' : 'false' }},
+        showErrors: {{ $errors->any() ? 'true' : 'false' }},
+        isEdit: {{ old('_method') === 'PUT' ? 'true' : 'false' }},
+        form: {
+            id: '{{ old('id') }}',
+            title: '{{ old('title') }}',
+            price: '{{ old('price') }}',
+            stock: '{{ old('stock') }}',
+            category_id: '{{ old('category_id') }}',
+            specifications: @json(old('specifications', []))
+        },
+    
+        openCreate() {
+            this.isEdit = false
+            this.showErrors = false
+            this.form = {
+                id: null,
+                title: '',
+                price: '',
+                stock: '',
+                category_id: '',
+                specifications: []
             }
-        }"
-        class="py-6"
-    >
+            this.open = true
+        },
+    
+        openEdit(product) {
+            this.isEdit = true
+            this.showErrors = false
+            this.form = product
+            this.open = true
+        },
+    
+        closeModal() {
+            this.open = false
+            this.showErrors = false
+        }
+    }" class="py-6">
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 rounded shadow">
@@ -57,6 +54,7 @@
                 <table class="min-w-full border">
                     <thead class="bg-gray-100">
                         <tr>
+                            <th class="border px-4 py-2">No</th>
                             <th class="border px-4 py-2">Produk</th>
                             <th class="border px-4 py-2">Kategori</th>
                             <th class="border px-4 py-2">Harga</th>
@@ -68,6 +66,9 @@
                     <tbody>
                         @foreach ($products as $product)
                             <tr>
+                                <td class="border px-4 py-2 font-medium text-center">
+                                    {{ $loop->iteration }}
+                                </td>
                                 <td class="border px-4 py-2 font-medium text-center">
                                     {{ $product->title }}
                                 </td>
@@ -92,18 +93,20 @@
                                             stock: @js($product->stock),
                                             category_id: @js($product->category_id),
                                             specifications: @js(
-                                                $product->specifications->map(fn($s) => [
+                                            $product->specifications->map(
+                                                fn($s) => [
                                                     'id' => $s->specification_id,
-                                                    'value' => $s->value
-                                                ])
-                                            )
+                                                    'value' => $s->value,
+                                                ],
+                                            ),
+                                        )
                                         })"
-                                        class="text-green-600"
-                                    >
+                                        class="text-green-600">
                                         Edit
                                     </button>
 
-                                    <form action="{{ route('products.destroy', $product) }}" method="POST" class="inline">
+                                    <form action="{{ route('products.destroy', $product) }}" method="POST"
+                                        class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button onclick="return confirm('Hapus produk?')" class="text-red-600">
@@ -128,11 +131,8 @@
 
                 <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Produk' : 'Tambah Produk'"></h3>
 
-                <form
-                    :action="isEdit ? `/products/${form.id}` : `{{ route('products.store') }}`"
-                    method="POST"
-                    class="space-y-4"
-                >
+                <form :action="isEdit ? `/products/${form.id}` : `{{ route('products.store') }}`" method="POST"
+                    enctype="multipart/form-data" class="space-y-4">
                     @csrf
 
                     <template x-if="isEdit">
@@ -140,26 +140,36 @@
                     </template>
 
                     <!-- TITLE -->
-                    <input type="text" name="title" x-model="form.title"
-                        class="w-full border rounded px-3 py-2"
+                    <input type="text" name="title" x-model="form.title" class="w-full border rounded px-3 py-2"
                         placeholder="Nama Produk">
 
                     <!-- CATEGORY -->
-                    <select name="category_id" x-model="form.category_id"
-                        class="w-full border rounded px-3 py-2">
+                    <select name="category_id" x-model="form.category_id" class="w-full border rounded px-3 py-2">
                         <option value="">Pilih Kategori</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
                     </select>
 
+                    <!-- IMAGE -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Gambar Produk</label>
+
+                        <input type="file" name="image" accept="image/*" class="w-full border rounded px-3 py-2">
+
+                        <!-- PREVIEW (EDIT MODE) -->
+                        <template x-if="isEdit && form.image_url">
+                            <img :src="form.image_url" class="mt-2 h-24 rounded object-cover border">
+                        </template>
+                    </div>
+
                     <!-- PRICE & STOCK -->
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="number" name="price" x-model="form.price"
-                            class="border rounded px-3 py-2" placeholder="Harga">
+                        <input type="number" name="price" x-model="form.price" class="border rounded px-3 py-2"
+                            placeholder="Harga">
 
-                        <input type="number" name="stock" x-model="form.stock"
-                            class="border rounded px-3 py-2" placeholder="Stok">
+                        <input type="number" name="stock" x-model="form.stock" class="border rounded px-3 py-2"
+                            placeholder="Stok">
                     </div>
 
                     <!-- SPECIFICATIONS -->
@@ -171,8 +181,7 @@
                                 <p class="font-medium text-sm">{{ $group->name }}</p>
 
                                 @foreach ($group->specifications as $spec)
-                                    <input type="text"
-                                        name="specifications[{{ $loop->parent->index }}][value]"
+                                    <input type="text" name="specifications[{{ $loop->parent->index }}][value]"
                                         x-model="form.specifications.find(s => s.id === {{ $spec->id }})?.value"
                                         placeholder="{{ $spec->name }} {{ $spec->unit }}"
                                         class="w-full border rounded px-2 py-1 mt-1">
