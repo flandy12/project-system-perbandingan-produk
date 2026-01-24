@@ -34,7 +34,7 @@
                     {{-- LINE CHART --}}
                     <div class="bg-white p-6 rounded-xl shadow">
                         <h2 class="font-semibold mb-3">Daily Visits (Last 30 Days)</h2>
-                        <div>
+                        <div class="h-64">
                             <canvas id="visitChart"></canvas>
                         </div>
                     </div>
@@ -42,7 +42,7 @@
                     {{-- BAR CHART --}}
                     <div class="bg-white p-6 rounded-xl shadow">
                         <h2 class="font-semibold mb-3">Top Product Clicks</h2>
-                        <div >
+                        <div class="h-64">
                             <canvas id="productChart"></canvas>
                         </div>
                     </div>
@@ -68,6 +68,10 @@
                         data: visitData,
                         tension: 0.3
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
             });
 
@@ -82,6 +86,10 @@
                         label: 'Clicks',
                         data: productData
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
             });
         </script>
