@@ -13,39 +13,52 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $headlines = HeadlineSlide::where('is_active', true)->orderBy('position')->get();
+        $headlines = HeadlineSlide::where('is_active', true)
+            ->orderBy('position')
+            ->get();
+
         $discounts = Discount::all();
+
         /**
          * TOP PENJUALAN
-         * Berdasarkan total_sold
          */
-        $topSales = Product::with('salesStats')
-            ->whereHas('salesStats')
-            ->orderByDesc(
-                ProductSalesStat::select('total_sold')
-                    ->whereColumn('product_sales_stats.product_id', 'products.id')
-            )
+        $topSales = Product::select('products.*')
+            ->join('product_sales_stats', 'product_sales_stats.product_id', '=', 'products.id')
+            ->where('products.status', 'active')
+            ->orderByDesc('product_sales_stats.total_sold')
             ->limit(8)
             ->get();
 
         /**
-         *  REKOMENDASI PRODUK
-         * Berdasarkan final_score
+         * REKOMENDASI PRODUK
          */
-        $recommendedProducts = Product::with('finalScore')
-            ->whereHas('finalScore')
-            ->orderByDesc(
-                ProductFinalScore::select('final_score')
-                    ->whereColumn('product_final_scores.product_id', 'products.id')
-            )
+        $recommendedProducts = Product::select('products.*')
+            ->join('product_final_scores', 'product_final_scores.product_id', '=', 'products.id')
+            ->where('products.status', 'active')
+            ->orderByDesc('product_final_scores.final_score')
             ->limit(8)
             ->get();
-    
+
+        /**
+         * LIST PRODUK (DENGAN PAGINATION)
+         */
+        $products = Product::where('status', 'active')
+            ->latest()
+            ->paginate(12);
+
         return view('pages.home.index', compact(
             'headlines',
             'discounts',
             'topSales',
-            'recommendedProducts'
+            'recommendedProducts',
+            'products'
         ));
+    }
+
+    public function  gallery()
+    {
+        $products = Product::all();
+
+        return view('pages/home/gallery', compact('products'));
     }
 }

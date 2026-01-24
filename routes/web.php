@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Role;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/gallery', [HomeController::class, 'gallery'])->name('gallery.index');
+
 
 Route::middleware([
     'auth:sanctum',

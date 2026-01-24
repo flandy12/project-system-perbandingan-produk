@@ -22,7 +22,6 @@ return new class extends Migration
             $table->decimal('raw_value', 10, 2);
             $table->decimal('normalized_score', 5, 2);
             $table->timestamps();
-
             $table->unique(['product_id', 'specification_id']);
         });
     }

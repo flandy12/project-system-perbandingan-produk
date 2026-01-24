@@ -24,7 +24,7 @@
     <div class="max-w-7xl mx-auto">
         <x-navbar />
     </div>
-    <div class="font-sans text-gray-900 antialiased">
+    <div class="font-sans text-gray-900 antialiased  h-max-screen">
         {{ $slot }}
     </div>
 

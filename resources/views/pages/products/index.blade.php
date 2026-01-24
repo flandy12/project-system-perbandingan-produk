@@ -1,56 +1,16 @@
 <x-app-layout>
-    <div x-data="{
-        open: {{ $errors->any() ? 'true' : 'false' }},
-        showErrors: {{ $errors->any() ? 'true' : 'false' }},
-        isEdit: {{ old('_method') === 'PUT' ? 'true' : 'false' }},
-        form: {
-            id: '{{ old('id') }}',
-            title: '{{ old('title') }}',
-            price: '{{ old('price') }}',
-            stock: '{{ old('stock') }}',
-            category_id: '{{ old('category_id') }}',
-            specifications: @json(old('specifications', []))
-        },
-    
-        openCreate() {
-            this.isEdit = false
-            this.showErrors = false
-            this.form = {
-                id: null,
-                title: '',
-                price: '',
-                stock: '',
-                category_id: '',
-                specifications: []
-            }
-            this.open = true
-        },
-    
-        openEdit(product) {
-            this.isEdit = true
-            this.showErrors = false
-            this.form = product
-            this.open = true
-        },
-    
-        closeModal() {
-            this.open = false
-            this.showErrors = false
-        }
-    }" class="py-6">
+    <div class="py-6">
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 rounded shadow">
 
-                <!-- HEADER -->
                 <div class="flex justify-between mb-4">
                     <h2 class="text-xl font-semibold">Product Management</h2>
-                    <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
+                    <button onclick="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
                         Tambah Produk
                     </button>
                 </div>
 
-                <!-- TABLE -->
                 <table class="min-w-full border">
                     <thead class="bg-gray-100">
                         <tr>
@@ -66,42 +26,14 @@
                     <tbody>
                         @foreach ($products as $product)
                             <tr>
-                                <td class="border px-4 py-2 font-medium text-center">
-                                    {{ $loop->iteration }}
-                                </td>
-                                <td class="border px-4 py-2 font-medium text-center">
-                                    {{ $product->title }}
-                                </td>
-                                <td class="border px-4 py-2 text-center">
-                                    {{ $product->category->name }}
-                                </td>
-                                <td class="border px-4 py-2 text-center">
-                                    Rp {{ number_format($product->price) }}
-                                </td>
-                                <td class="border px-4 py-2 text-center">
-                                    {{ $product->stock }}
-                                </td>
-                                <td class="border px-4 py-2 text-center">
-                                    {{ $product->status }}
-                                </td>
+                                <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
+                                <td class="border px-4 py-2 text-center">{{ $product->title }}</td>
+                                <td class="border px-4 py-2 text-center">{{ $product->category->name }}</td>
+                                <td class="border px-4 py-2 text-center">Rp {{ number_format($product->price) }}</td>
+                                <td class="border px-4 py-2 text-center">{{ $product->stock }}</td>
+                                <td class="border px-4 py-2 text-center capitalize">{{ $product->status ?? '' }}</td>
                                 <td class="border px-4 py-2 text-center space-x-2">
-                                    <button
-                                        @click="openEdit({
-                                            id: {{ $product->id }},
-                                            title: @js($product->title),
-                                            price: @js($product->price),
-                                            stock: @js($product->stock),
-                                            category_id: @js($product->category_id),
-                                            specifications: @js(
-                                            $product->specifications->map(
-                                                fn($s) => [
-                                                    'id' => $s->specification_id,
-                                                    'value' => $s->value,
-                                                ],
-                                            ),
-                                        )
-                                        })"
-                                        class="text-green-600">
+                                    <button onclick='openEdit(@json($product))' class="text-green-600">
                                         Edit
                                     </button>
 
@@ -126,73 +58,91 @@
         </div>
 
         <!-- MODAL -->
-        <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
-            <div @click.away="closeModal()" class="bg-white w-full max-w-xl p-6 rounded">
+        <div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
+            <div class="bg-white w-full max-w-xl p-6 rounded">
 
-                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Produk' : 'Tambah Produk'"></h3>
+                <h3 id="modalTitle" class="text-lg font-semibold mb-4">Tambah Produk</h3>
 
-                <form :action="isEdit ? `/products/${form.id}` : `{{ route('products.store') }}`" method="POST"
+                <form id="productForm" action="{{ route('products.store') }}" method="POST"
                     enctype="multipart/form-data" class="space-y-4">
                     @csrf
+                    <input type="hidden" name="_method" id="method">
 
-                    <template x-if="isEdit">
-                        <input type="hidden" name="_method" value="PUT">
-                    </template>
-
-                    <!-- TITLE -->
-                    <input type="text" name="title" x-model="form.title" class="w-full border rounded px-3 py-2"
-                        placeholder="Nama Produk">
-
-                    <!-- CATEGORY -->
-                    <select name="category_id" x-model="form.category_id" class="w-full border rounded px-3 py-2">
-                        <option value="">Pilih Kategori</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-
-                    <!-- IMAGE -->
                     <div>
-                        <label class="block text-sm font-medium mb-1">Gambar Produk</label>
-
-                        <input type="file" name="image" accept="image/*" class="w-full border rounded px-3 py-2">
-
-                        <!-- PREVIEW (EDIT MODE) -->
-                        <template x-if="isEdit && form.image_url">
-                            <img :src="form.image_url" class="mt-2 h-24 rounded object-cover border">
-                        </template>
+                        <input type="text" name="title" id="title" value="{{ old('title') }}"
+                            class="w-full border rounded px-3 py-2 @error('title') border-red-500 @enderror"
+                            placeholder="Nama Produk">
+                        @error('title')
+                            <p class="text-red-600 text-sm">{{ $message }}</p>
+                        @enderror
                     </div>
 
-                    <!-- PRICE & STOCK -->
+                    <div>
+                        <select name="category_id" id="category_id"
+                            class="w-full border rounded px-3 py-2 @error('category_id') border-red-500 @enderror">
+                            <option value="">Pilih Kategori</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}"
+                                    {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('category_id')
+                            <p class="text-red-600 text-sm">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <input type="file" name="image"
+                            class="w-full border rounded px-3 py-2 @error('image') border-red-500 @enderror">
+                        @error('image')
+                            <p class="text-red-600 text-sm">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="number" name="price" x-model="form.price" class="border rounded px-3 py-2"
-                            placeholder="Harga">
+                        <div>
+                            <input type="number" name="price" id="price" value="{{ old('price') }}"
+                                class="border rounded px-3 py-2 w-full @error('price') border-red-500 @enderror"
+                                placeholder="Harga">
+                            @error('price')
+                                <p class="text-red-600 text-sm">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                        <input type="number" name="stock" x-model="form.stock" class="border rounded px-3 py-2"
-                            placeholder="Stok">
+                        <div>
+                            <input type="number" name="stock" id="stock" value="{{ old('stock') }}"
+                                class="border rounded px-3 py-2 w-full @error('stock') border-red-500 @enderror"
+                                placeholder="Stok">
+                            @error('stock')
+                                <p class="text-red-600 text-sm">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
-                    <!-- SPECIFICATIONS -->
-                    <div class="border rounded p-3 max-h-64 overflow-y-auto">
+                    <div class="border rounded p-3">
                         <p class="font-semibold mb-2">Spesifikasi Produk</p>
-
                         @foreach ($specificationGroups as $group)
-                            <div class="mb-3">
-                                <p class="font-medium text-sm">{{ $group->name }}</p>
-
-                                @foreach ($group->specifications as $spec)
-                                    <input type="text" name="specifications[{{ $loop->parent->index }}][value]"
-                                        x-model="form.specifications.find(s => s.id === {{ $spec->id }})?.value"
-                                        placeholder="{{ $spec->name }} {{ $spec->unit }}"
-                                        class="w-full border rounded px-2 py-1 mt-1">
-                                @endforeach
-                            </div>
+                            <p class="font-medium text-sm">{{ $group->name }}</p>
+                            @foreach ($group->specifications as $spec)
+                                <input type="text" name="specifications[{{ $spec->id }}]"
+                                    id="spec_{{ $spec->id }}" value="{{ old('specifications.' . $spec->id) }}"
+                                    placeholder="{{ $spec->name }}" class="w-full border rounded px-2 py-1 mt-1">
+                            @endforeach
                         @endforeach
                     </div>
 
-                    <!-- ACTION -->
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" name="status" value="active" id="status"
+                            {{ old('status', $product->status ?? '') === 'active' ? 'checked' : '' }}
+                            class="rounded border-gray-300">
+                        <label for="status" class="text-sm">Active</label>
+                    </div>
+
+
                     <div class="flex justify-end gap-3">
-                        <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded">
                             Batal
                         </button>
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
@@ -205,4 +155,44 @@
         </div>
 
     </div>
+
+    @push('scripts')
+        <script>
+            function openCreate() {
+                document.getElementById('modal').classList.remove('hidden')
+                document.getElementById('modalTitle').innerText = 'Tambah Produk'
+                document.getElementById('productForm').action = "{{ route('products.store') }}"
+                document.getElementById('method').value = ''
+                document.getElementById('productForm').reset()
+            }
+
+            function openEdit(product) {
+                document.getElementById('modal').classList.remove('hidden')
+                document.getElementById('modalTitle').innerText = 'Edit Produk'
+                document.getElementById('productForm').action = `/products/${product.id}`
+                document.getElementById('method').value = 'PUT'
+
+                title.value = product.title
+                price.value = product.price
+                stock.value = product.stock
+                category_id.value = product.category_id
+
+                if (product.specifications) {
+                    product.specifications.forEach(spec => {
+                        const el = document.getElementById('spec_' + spec.specification_id)
+                        if (el) el.value = spec.value
+                    })
+                }
+            }
+
+            function closeModal() {
+                document.getElementById('modal').classList.add('hidden')
+            }
+
+            // AUTO OPEN MODAL JIKA VALIDASI ERROR
+            @if ($errors->any())
+                document.getElementById('modal').classList.remove('hidden')
+            @endif
+        </script>
+    @endpush
 </x-app-layout>

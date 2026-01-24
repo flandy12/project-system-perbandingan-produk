@@ -7,7 +7,7 @@
 
                 @foreach ($headlines as $i => $headline)
                     <div x-show="active === {{ $i }}" x-transition.opacity class="absolute inset-0">
-                        <img src="{{ asset('storage/' . $headline->image) }}" class="w-full h-full object-cover">
+                        <img src="{{ asset('storage/' . $headline->image) }}" class="h-full object-cover">
 
                         <div class="absolute inset-0 bg-black/50 flex items-center">
                             <div class="px-10 text-white max-w-xl">
@@ -61,11 +61,27 @@
             <div id="discount" class="mb-16">
                 <h2 class="text-lg font-semibold mb-4">Discount</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    @foreach ($dicounts as $discount)
-                        <div class="bg-white rounded-xl p-4 shadow">
-                            <div class="h-28 bg-sky-200 rounded mb-3"></div>
-                            <p class="text-center font-semibold">Rp.{{ number_format($discount->price, 0, ',', '.') }}
-                            </p>
+                    @foreach ($dicounts as $product)
+                        <div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+
+                            <!-- Image wrapper with fixed ratio -->
+                            <div class="relative w-full aspect-[4/5] bg-sky-200">
+                                @if ($product->image ?? false)
+                                    <img src="{{ asset('storage/' . $product->image) }}"
+                                        class="absolute inset-0 w-full h-full object-cover" alt="{{ $product->title }}">
+                                @endif
+                            </div>
+
+                            <!-- Content -->
+                            <div class="p-4">
+                                <p class="text-center font-semibold truncate">
+                                    {{ $product->title }}
+                                </p>
+
+                                <p class="text-center font-semibold text-sky-600">
+                                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                                </p>
+                            </div>
                         </div>
                     @endforeach
                 </div>
@@ -77,6 +93,40 @@
             </div>
         @endif
 
+        {{-- TOP --}}
+        <div id="top-penjualan" class="mb-16">
+            <h2 class="text-lg font-semibold mb-4">Top Penjualan</h2>
+
+            @if ($topSales->count() > 0)
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    @foreach ($topSales as $product)
+                       <div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+
+                            <!-- Image wrapper with fixed ratio -->
+                            <div class="relative w-full aspect-[4/5] bg-sky-200">
+                                @if ($product->image ?? false)
+                                    <img src="{{ asset('storage/' . $product->image) }}"
+                                        class="absolute inset-0 w-full h-full object-cover" alt="{{ $product->title }}">
+                                @endif
+                            </div>
+
+                            <!-- Content -->
+                            <div class="p-4">
+                                <p class="text-center font-semibold truncate">
+                                    {{ $product->title }}
+                                </p>
+
+                                <p class="text-center font-semibold text-sky-600">
+                                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p class="text-gray-500 italic">Belum ada data penjualan.</p>
+            @endif
+        </div>
 
         {{-- FEATURE --}}
         <div class="mb-20">
@@ -93,37 +143,6 @@
             </div>
         </div>
 
-        {{-- TOP --}}
-        <div id="top-penjualan" class="mb-16">
-            <h2 class="text-lg font-semibold mb-4">Top Penjualan</h2>
-
-            @if ($topSales->count() > 0)
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    @foreach ($topSales as $product)
-                        <div class="bg-white rounded-xl p-4 shadow hover:shadow-lg transition">
-                            <div class="h-28 bg-sky-200 rounded mb-3 overflow-hidden">
-                                @if ($product->image ?? false)
-                                    <img src="{{ asset('storage/' . $product->image) }}"
-                                        class="w-full h-full object-cover">
-                                @endif
-                            </div>
-
-                            <p class="text-center font-semibold">
-                                Rp.{{ number_format($product->price, 0, ',', '.') }}
-                            </p>
-
-                            <p class="text-xs text-center text-gray-500 mt-1">
-                                Terjual: {{ $product->salesStat->total_sold ?? 0 }}
-                            </p>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <p class="text-gray-500 italic">Belum ada data penjualan.</p>
-            @endif
-        </div>
-
-
         {{-- REKOMENDASI --}}
         @if (!empty($recommendedProducts))
             <div id="rekomendasi" class="mb-16">
@@ -132,21 +151,27 @@
                 @if ($recommendedProducts->count() > 0)
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         @foreach ($recommendedProducts as $product)
-                            <div class="bg-white rounded-xl p-4 shadow hover:shadow-lg transition">
-                                <div class="h-28 bg-sky-200 rounded mb-3 overflow-hidden">
+                            <div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+
+                                <!-- Image wrapper with fixed ratio -->
+                                <div class="relative w-full aspect-[4/5] bg-sky-200">
                                     @if ($product->image ?? false)
                                         <img src="{{ asset('storage/' . $product->image) }}"
-                                            class="w-full h-full object-cover">
+                                            class="absolute inset-0 w-full h-full object-cover"
+                                            alt="{{ $product->title }}">
                                     @endif
                                 </div>
-                    
-                                <p class="text-center font-semibold">
-                                    Rp.{{ number_format($product->price, 0, ',', '.') }}
-                                </p>
 
-                                <p class="text-xs text-center text-gray-500 mt-1">
-                                    Score: {{ number_format($product->finalScore->final_score ?? 0, 3) }}
-                                </p>
+                                <!-- Content -->
+                                <div class="p-4">
+                                    <p class="text-center font-semibold truncate">
+                                        {{ $product->title }}
+                                    </p>
+
+                                    <p class="text-center font-semibold text-sky-600">
+                                        Rp {{ number_format($product->price, 0, ',', '.') }}
+                                    </p>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -156,6 +181,41 @@
             </div>
         @endif
 
+
+        <div id="top-penjualan" class="mb-16">
+            <h2 class="text-lg font-semibold mb-4">Product</h2>
+
+            @if (!empty($products))
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 cursor-pointer">
+                    @foreach ($products as $product)
+                        <div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+
+                            <!-- Image wrapper with fixed ratio -->
+                            <div class="relative w-full aspect-[4/5] bg-sky-200">
+                                @if ($product->image ?? false)
+                                    <img src="{{ asset('storage/' . $product->image) }}"
+                                        class="absolute inset-0 w-full h-full object-cover"
+                                        alt="{{ $product->title }}">
+                                @endif
+                            </div>
+
+                            <!-- Content -->
+                            <div class="p-4">
+                                <p class="text-center font-semibold truncate">
+                                    {{ $product->title }}
+                                </p>
+
+                                <p class="text-center font-semibold text-sky-600">
+                                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p class="text-gray-500 italic">Belum ada data penjualan.</p>
+            @endif
+        </div>
 
 
         {{-- MODAL --}}
