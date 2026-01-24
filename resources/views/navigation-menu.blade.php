@@ -48,9 +48,9 @@
                         </x-dropdown>
                     </div>
 
-                <x-nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.index')">
-                    {{ __('Product') }}
-                </x-nav-link>
+                    <x-nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.index')">
+                        {{ __('Product') }}
+                    </x-nav-link>
 
                     <x-nav-link href="{{ route('category.index') }}" :active="request()->routeIs('category.index')">
                         {{ __('Category') }}

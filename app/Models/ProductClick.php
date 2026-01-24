@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductClick extends Model
 {
-    protected $fillable = [
-        'product_id',
-        'user_id',
-        'ip_address',
-        'clicked_at'
-    ];
+protected $fillable = [
+    'product_id',
+    'user_id',
+    'ip_address',
+    'clicked_at'
+];
 
     protected $casts = [
         'clicked_at' => 'datetime'

@@ -22,13 +22,53 @@
 <body>
 
     <div class="max-w-7xl mx-auto">
-        <x-navbar />
+        <x-navbar-frontend />
     </div>
     <div class="font-sans text-gray-900 antialiased  h-max-screen">
         {{ $slot }}
     </div>
 
     @stack('js')
+
+    <script>
+        window.trackClick = function(productId) {
+            fetch(`/track/product-click/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    keepalive: true
+                })
+                .then(res => {
+                    if (!res.ok) throw res;
+                    return res.json();
+                })
+                .then(d => console.log('Tracked', d))
+                .catch(e => console.error('Track error', e));
+        }
+
+        window.trackPageView = function() {
+            fetch(`/track/page-view`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute('content')
+                },
+                keepalive: true
+            });
+        }
+
+        // auto fire once
+        document.addEventListener('DOMContentLoaded', () => {
+            trackPageView();
+        });
+    </script>
+
+
     @livewireScripts
 </body>
 

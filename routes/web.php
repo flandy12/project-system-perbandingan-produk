@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\HeadlineSliderController;
@@ -15,12 +16,15 @@ use App\Http\Controllers\ScoreWeightController;
 use App\Http\Controllers\SpecificationController;
 use App\Http\Controllers\SpecificationGroupController;
 use App\Http\Controllers\SpecificationScoreController;
+use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Role;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/gallery', [HomeController::class, 'gallery'])->name('gallery.index');
+Route::post('/track/product-click/{product}', [TrackingController::class, 'productClick']);
+Route::post('/track/page-view', [TrackingController::class, 'pageView']);
 
 
 Route::middleware([
@@ -29,9 +33,7 @@ Route::middleware([
     'verified',
 ])->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [AnalyticsController::class, 'index'])->name('dashboard');
 
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);
