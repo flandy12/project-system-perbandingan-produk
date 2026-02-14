@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductFinalScoreController;
+use App\Http\Controllers\ProductSalesStatController;
 use App\Http\Controllers\ProductSpecificationController;
 use App\Http\Controllers\ProductSpecificationScoreController;
 use App\Http\Controllers\RoleController;
@@ -61,4 +62,6 @@ Route::middleware([
     Route::resource('product-specification-scores', ProductSpecificationScoreController::class);
     Route::resource('score-weights', ScoreWeightController::class);
     Route::resource('product-final-scores', ProductFinalScoreController::class);
+    Route::resource('top-product', ProductSalesStatController::class);
+
 });

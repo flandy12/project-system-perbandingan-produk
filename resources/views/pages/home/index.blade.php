@@ -60,7 +60,7 @@
             <h2 class="text-lg font-semibold mb-4">Discount</h2>
 
             @if ($discounts->count())
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     @foreach ($discounts as $product)
                         @include('components.product-card', ['product' => $product])
                     @endforeach
@@ -92,7 +92,7 @@
             <h2 class="text-lg font-semibold mb-4">Rekomendasi</h2>
 
             @if ($recommendedProducts->count())
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     @foreach ($recommendedProducts as $product)
                         @include('components.product-card', ['product' => $product])
                     @endforeach
@@ -107,7 +107,7 @@
         <div id="products" class="mb-16">
             <h2 class="text-lg font-semibold mb-4">Product</h2>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 @foreach ($products as $product)
                     @include('components.product-card', ['product' => $product])
                 @endforeach

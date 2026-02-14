@@ -64,90 +64,92 @@
                 <h3 id="modalTitle" class="text-lg font-semibold mb-4">Tambah Produk</h3>
 
                 <form id="productForm" action="{{ route('products.store') }}" method="POST"
-                    enctype="multipart/form-data" class="space-y-4">
+                    enctype="multipart/form-data" class="h-[300px]">
                     @csrf
-                    <input type="hidden" name="_method" id="method">
+                    <div class="h-[300px] overflow-hidden overflow-y-scroll space-y-4 ">
+                        <input type="hidden" name="_method" id="method">
 
-                    <div>
-                        <input type="text" name="title" id="title" value="{{ old('title') }}"
-                            class="w-full border rounded px-3 py-2 @error('title') border-red-500 @enderror"
-                            placeholder="Nama Produk">
-                        @error('title')
-                            <p class="text-red-600 text-sm">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <select name="category_id" id="category_id"
-                            class="w-full border rounded px-3 py-2 @error('category_id') border-red-500 @enderror">
-                            <option value="">Pilih Kategori</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}"
-                                    {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('category_id')
-                            <p class="text-red-600 text-sm">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <input type="file" name="image"
-                            class="w-full border rounded px-3 py-2 @error('image') border-red-500 @enderror">
-                        @error('image')
-                            <p class="text-red-600 text-sm">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <input type="number" name="price" id="price" value="{{ old('price') }}"
-                                class="border rounded px-3 py-2 w-full @error('price') border-red-500 @enderror"
-                                placeholder="Harga">
-                            @error('price')
+                            <input type="text" name="title" id="title" value="{{ old('title') }}"
+                                class="w-full border rounded px-3 py-2 @error('title') border-red-500 @enderror"
+                                placeholder="Nama Produk">
+                            @error('title')
                                 <p class="text-red-600 text-sm">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <input type="number" name="stock" id="stock" value="{{ old('stock') }}"
-                                class="border rounded px-3 py-2 w-full @error('stock') border-red-500 @enderror"
-                                placeholder="Stok">
-                            @error('stock')
+                            <select name="category_id" id="category_id"
+                                class="w-full border rounded px-3 py-2 @error('category_id') border-red-500 @enderror">
+                                <option value="">Pilih Kategori</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}"
+                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('category_id')
                                 <p class="text-red-600 text-sm">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
 
-                    <div class="border rounded p-3">
-                        <p class="font-semibold mb-2">Spesifikasi Produk</p>
-                        @foreach ($specificationGroups as $group)
-                            <p class="font-medium text-sm">{{ $group->name }}</p>
-                            @foreach ($group->specifications as $spec)
-                                <input type="text" name="specifications[{{ $spec->id }}]"
-                                    id="spec_{{ $spec->id }}" value="{{ old('specifications.' . $spec->id) }}"
-                                    placeholder="{{ $spec->name }}" class="w-full border rounded px-2 py-1 mt-1">
+                        <div>
+                            <input type="file" name="image"
+                                class="w-full border rounded px-3 py-2 @error('image') border-red-500 @enderror">
+                            @error('image')
+                                <p class="text-red-600 text-sm">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <input type="number" name="price" id="price" value="{{ old('price') }}"
+                                    class="border rounded px-3 py-2 w-full @error('price') border-red-500 @enderror"
+                                    placeholder="Harga">
+                                @error('price')
+                                    <p class="text-red-600 text-sm">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <input type="number" name="stock" id="stock" value="{{ old('stock') }}"
+                                    class="border rounded px-3 py-2 w-full @error('stock') border-red-500 @enderror"
+                                    placeholder="Stok">
+                                @error('stock')
+                                    <p class="text-red-600 text-sm">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                    <div class="border rounded p-3 space-y-4 ">
+                            <p class="font-semibold mb-2">Spesifikasi Produk</p>
+                            @foreach ($specificationGroups as $group)
+                                <p class="font-medium text-sm">{{ $group->name }}</p>
+                                @foreach ($group->specifications as $spec)
+                                    <input type="text" name="specifications[{{ $spec->id }}]"
+                                        id="spec_{{ $spec->id }}" value="{{ old('specifications.' . $spec->id) }}"
+                                        placeholder="{{ $spec->name }}" class="w-full border rounded px-2 py-1 mt-1">
+                                @endforeach
                             @endforeach
-                        @endforeach
-                    </div>
+                        </div>
 
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" name="status" value="active" id="status"
-                            {{ old('status', $product->status ?? '') === 'active' ? 'checked' : '' }}
-                            class="rounded border-gray-300">
-                        <label for="status" class="text-sm">Active</label>
-                    </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" name="status" value="active" id="status"
+                                {{ old('status', $product->status ?? '') === 'active' ? 'checked' : '' }}
+                                class="rounded border-gray-300">
+                            <label for="status" class="text-sm">Active</label>
+                        </div>
 
 
-                    <div class="flex justify-end gap-3">
-                        <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded">
-                            Batal
-                        </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
-                            Simpan
-                        </button>
+                        <div class="flex justify-end gap-3">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded">
+                                Batal
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
+                                Simpan
+                            </button>
+                        </div>
                     </div>
 
                 </form>

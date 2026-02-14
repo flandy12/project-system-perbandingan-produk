@@ -90,6 +90,11 @@
                     Headline Slider
                 </x-nav-link>
 
+
+                <x-nav-link href="{{ route('top-product.index') }}">
+                    Top Product
+                </x-nav-link>
+
             </nav>
 
             <!-- USER PROFILE -->

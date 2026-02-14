@@ -17,8 +17,9 @@ class HomeController extends Controller
             ->orderBy('position')
             ->get();
 
-        $discounts = Discount::all();
-
+        $discounts = Product::whereHas('discounts')
+            ->with('discounts')
+            ->get();
         /**
          * TOP PENJUALAN
          */
@@ -31,6 +32,7 @@ class HomeController extends Controller
 
         /**
          * REKOMENDASI PRODUK
+         * Rekomendasi produk ini berdasarkan nilai final_score yang ada di tabel:
          */
         $recommendedProducts = Product::select('products.*')
             ->join('product_final_scores', 'product_final_scores.product_id', '=', 'products.id')

@@ -90,13 +90,16 @@
                         </x-dropdown>
                     </div>
 
-
                     <x-nav-link href="{{ route('discount.index') }}" :active="request()->routeIs('discount.index')">
                         {{ __('Discount') }}
                     </x-nav-link>
 
                     <x-nav-link href="{{ route('headline-slide.index') }}" :active="request()->routeIs('headline-slide.index')">
                         {{ __('Headline Slider') }}
+                    </x-nav-link>
+
+                    <x-nav-link href="{{ route('top-product.index') }}" :active="request()->routeIs('top-product.index')">
+                        {{ __('Top Sales') }}
                     </x-nav-link>
 
                 </div>
