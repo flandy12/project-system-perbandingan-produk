@@ -27,6 +27,7 @@
     <div class="font-sans text-gray-900 antialiased  h-max-screen">
         {{ $slot }}
     </div>
+    <x-footer />
 
     @stack('js')
 

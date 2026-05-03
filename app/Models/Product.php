@@ -57,4 +57,17 @@ class Product extends Model
     {
         return $this->hasMany(Discount::class);
     }
+
+    // OPTIONAL (advanced)
+    public function specs()
+    {
+        return $this->hasManyThrough(
+            Specification::class,
+            ProductSpecification::class,
+            'product_id',
+            'id',
+            'id',
+            'specification_id'
+        );
+    }
 }

@@ -1,6 +1,10 @@
-import './bootstrap';
-import Alpine from 'alpinejs'
- 
-window.Alpine = Alpine
- 
-Alpine.start()
+import "./bootstrap";
+import Alpine from "alpinejs";
+import createCompareApp from "./helper";
+
+window.Alpine = Alpine;
+
+// 🔥 expose ke Alpine
+window.compare = createCompareApp();
+
+Alpine.start();

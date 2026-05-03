@@ -26,6 +26,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/gallery', [HomeController::class, 'gallery'])->name('gallery.index');
 Route::post('/track/product-click/{product}', [TrackingController::class, 'productClick']);
 Route::post('/track/page-view', [TrackingController::class, 'pageView']);
+Route::get('/compare', [HomeController::class, 'compare'])->name('versus.index');
+
+
 
 
 Route::middleware([

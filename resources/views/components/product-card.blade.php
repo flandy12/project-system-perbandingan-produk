@@ -1,8 +1,7 @@
 <div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden cursor-pointer"
      @click="
         trackClick({{ $product->id }});
-        selectedProduct={{ $product->toJson() }};
-        modalOpen=true
+        setProduct(@js($product));
      ">
 
     <div class="relative w-full aspect-[4/5] bg-sky-200">

@@ -27,4 +27,9 @@ class Specification extends Model
     {
         return $this->hasOne(SpecificationScore::class);
     }
+
+    public function category()
+    {
+        return $this->belongsTo(SpecCategory::class, 'category_id');
+    }
 }

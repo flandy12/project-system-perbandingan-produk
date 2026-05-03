@@ -1,32 +1,41 @@
 <x-frontend-layout>
     <div class="relative max-w-7xl mx-auto px-4 mb-12">
-        <div id="top-penjualan" class="mb-16">
-            <h2 class="text-lg font-semibold mb-4">Product</h2>
+        <div id="top-penjualan" class="mb-16    ">
+            <div class="flex justify-between mb-6">
+                <h2 class="text-lg font-semibold mb-4">Product</h2>
+                <div class="flex flex-wrap gap-3 mb-6" x-data="{ open: false }">
+                    <form method="GET" action="{{ url()->current() }}" onsubmit="return cleanQuery(this)">
+                        <!-- Sort -->
+                        <select name="sort" class="border rounded px-3 py-2 text-sm w-32">
+                            <option value="">Urutkan</option>
+                            <option value="newest">Terbaru</option>
+                            <option value="oldest">Terlama</option>
+                            <option value="best">Terbaik</option>
+                            <option value="worst">Terburuk</option>
+                        </select>
+
+                        <!-- Harga -->
+                        <input type="number" name="price_min" placeholder="Harga Min"
+                            class="border rounded px-3 py-2 text-sm w-32">
+
+                        <input type="number" name="price_max" placeholder="Harga Max"
+                            class="border rounded px-3 py-2 text-sm w-32">
+
+                        <!-- Tanggal -->
+                        <input type="date" name="date" class="border rounded px-3 py-2 text-sm">
+
+                        <button type="submit" class="bg-[#111727] text-white px-4 py-2 rounded">
+                            Filter
+                        </button>
+                    </form>
+
+                </div>
+            </div>
 
             @if (!empty($products))
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 cursor-pointer">
                     @foreach ($products as $product)
-                        <div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
-
-                            <!-- Image wrapper with fixed ratio -->
-                            <div class="relative w-full aspect-[4/5] bg-sky-200">
-                                @if ($product->image ?? false)
-                                    <img src="{{ asset('storage/' . $product->image) }}"
-                                        class="absolute inset-0 w-full h-full object-cover" alt="{{ $product->title }}">
-                                @endif
-                            </div>
-
-                            <!-- Content -->
-                            <div class="p-4">
-                                <p class="text-center font-semibold truncate">
-                                    {{ $product->title }}
-                                </p>
-
-                                <p class="text-center font-semibold text-sky-600">
-                                    Rp {{ number_format($product->price, 0, ',', '.') }}
-                                </p>
-                            </div>
-                        </div>
+                        @include('components.product-card', ['product' => $product])
                     @endforeach
                 </div>
             @else
@@ -65,4 +74,26 @@
 
     </div>
 
+
+    @push('js')
+        <script>
+            function cleanQuery(form) {
+                const inputs = form.querySelectorAll('input, select');
+                let hasValue = false;
+
+                inputs.forEach(input => {
+                    if (input.value && input.value.trim() !== '') {
+                        hasValue = true;
+                    }
+                });
+
+                if (!hasValue) {
+                    window.location.href = form.action; // redirect tanpa query
+                    return false;
+                }
+
+                return true;
+            }
+        </script>
+    @endpush
 </x-frontend-layout>

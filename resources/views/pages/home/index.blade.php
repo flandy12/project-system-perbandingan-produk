@@ -36,13 +36,14 @@
 
 
     {{-- ================= ROOT STATE ================= --}}
-    <div x-data="{ active: 'top', modalOpen: false, selectedProduct: null }" class="max-w-7xl mx-auto px-4">
+    <div x-data="compare" x-init="init()" class="max-w-7xl mx-auto px-4">
 
         {{-- FILTER --}}
         <div class="flex gap-3 mb-10">
-            <button @click="active='top'; document.getElementById('top-penjualan').scrollIntoView({behavior:'smooth'})"
-                :class="active === 'top' ? 'bg-sky-100 text-sky-700' : 'border'" class="px-4 py-2 rounded-full">Top
-                Penjualan</button>
+            <button @click="scrollTo('top-penjualan','top')" :class="active === 'top' ? activeClass : defaultClass"
+                class="px-4 py-2 rounded-full">
+                Top Penjualan
+            </button>
 
             <button
                 @click="active='rekomendasi'; document.getElementById('rekomendasi').scrollIntoView({behavior:'smooth'})"
@@ -115,38 +116,62 @@
         </div>
 
 
-        {{-- MODAL --}}
         <div x-show="modalOpen" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+
+            <!-- overlay -->
             <div @click="modalOpen=false" class="absolute inset-0 bg-black/40"></div>
 
+            <!-- modal -->
             <div class="relative bg-white rounded-2xl w-full max-w-lg p-6">
 
+                <!-- header -->
                 <div class="flex justify-between mb-4">
-                    <h3 class="font-semibold text-lg" x-text="selectedProduct?.title"></h3>
+                    <h3 class="font-semibold text-lg" x-text="selectedProduct ? selectedProduct.title : ''">
+                    </h3>
+
                     <button @click="modalOpen=false">✕</button>
                 </div>
 
+                <!-- image -->
                 <div class="h-56 rounded mb-4 overflow-hidden bg-gray-100">
-                    <img :src="'/storage/' + selectedProduct?.image" class="w-full h-full object-cover"
-                        x-show="selectedProduct?.image">
+                    <img :src="selectedProduct && selectedProduct.image ?
+                        '/storage/' + selectedProduct.image :
+                        '/no-image.png'"
+                        class="w-full h-full object-cover">
                 </div>
 
-                <p class="text-xl font-bold mb-3 text-sky-600"
-                    x-text="'Rp ' + Number(selectedProduct?.price).toLocaleString('id-ID')">
+                <!-- price -->
+                <p class="text-xl font-bold mb-3 text-sky-600" x-text="formatPrice(selectedProduct?.price)">
                 </p>
 
-                <p class="text-sm text-gray-600 mb-4" x-text="selectedProduct?.description">
+                <!-- description -->
+                <p class="text-sm text-gray-600 mb-4" x-text="selectedProduct ? selectedProduct.description : ''">
                 </p>
 
+                <!-- actions -->
                 <div class="flex gap-3">
-                    <a :href="'/product/' + selectedProduct?.id"
+
+                    <!-- detail -->
+                    <a :href="selectedProduct ? '/product/' + selectedProduct.id : '#'"
                         class="flex-1 text-center py-2 bg-sky-600 text-white rounded hover:bg-sky-700">
                         Lihat Detail
                     </a>
 
-                    <button class="flex-1 py-2 border rounded hover:bg-gray-50">
-                        Bandingkan
+                    <!-- compare -->
+                    <button @click="selectedProduct && toggle(String(selectedProduct.id))"
+                        :class="isSelected(selectedProduct?.id) ?
+                            'bg-green-500 text-white border-green-500' :
+                            'border'"
+                        class="flex-1 py-2 rounded hover:bg-gray-50 transition">
+
+                        <span
+                            x-text="isSelected(selectedProduct?.id) 
+                    ? '✓ Dipilih' 
+                    : 'Bandingkan'">
+                        </span>
+
                     </button>
+
                 </div>
             </div>
         </div>
