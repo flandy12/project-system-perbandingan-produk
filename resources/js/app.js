@@ -4,7 +4,6 @@ import createCompareApp from "./helper";
 
 window.Alpine = Alpine;
 
-// 🔥 expose ke Alpine
-window.compare = createCompareApp();
+window.compare = createCompareApp;
 
 Alpine.start();

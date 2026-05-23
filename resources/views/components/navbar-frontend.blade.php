@@ -11,8 +11,12 @@
         <x-nav-link href="{{ route('gallery.index') }}" :active="request()->routeIs('gallery.index')">
             {{ __('Product') }}
         </x-nav-link>
-                <x-nav-link href="{{ route('versus.index') }}" :active="request()->routeIs('versus.index')">
+        <x-nav-link href="{{ route('versus.index') }}" :active="request()->routeIs('versus.index')">
             {{ __('versus') }}
+        </x-nav-link>
+
+        <x-nav-link href="{{ route('contact.index') }}" :active="request()->routeIs('contact.index')">
+            {{ __('Contact') }}
         </x-nav-link>
     </div>
 

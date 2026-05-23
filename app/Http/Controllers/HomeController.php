@@ -10,6 +10,7 @@ use App\Models\ProductFinalScore;
 use App\Models\ProductSalesStat;
 use App\Services\CompareService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -59,9 +60,8 @@ class HomeController extends Controller
         ));
     }
 
-    public function  gallery(Request $request)
+    public function gallery(Request $request)
     {
-
         $request->validate([
             'price_min' => 'nullable|integer|min:0',
             'price_max' => 'nullable|integer|min:0',
@@ -69,82 +69,122 @@ class HomeController extends Controller
             'date' => 'nullable|date',
         ]);
 
-        $products = Product::query()
-
-            // FILTER HARGA
-            ->when($request->price_min, function ($q) use ($request) {
-                $q->where('price', '>=', (int) $request->price_min);
-            })
-            ->when($request->price_max, function ($q) use ($request) {
-                $q->where('price', '<=', (int) $request->price_max);
-            })
-
-            // FILTER TANGGAL
+        $products = Product::query()->select(
+            'products.*',
+            DB::raw('COUNT(product_clicks.id) as total_clicks')
+        )->leftJoin(
+            'product_clicks',
+            'products.id',
+            '=',
+            'product_clicks.product_id'
+        )->when($request->price_min, function ($q) use ($request) {
+            $q->where('products.price', '>=', $request->price_min);
+        })->when($request->price_max, function ($q) use ($request) {
+            $q->where('products.price', '<=', $request->price_max);
+        }) // FILTER TANGGAL
             ->when($request->date, function ($q) use ($request) {
-                $q->whereDate('created_at', $request->date);
+                $q->whereDate('products.created_at', $request->date);
             })
+
+            // GROUP BY WAJIB
+            ->groupBy('products.id')
 
             // SORTING
             ->when($request->sort, function ($q) use ($request) {
+
                 switch ($request->sort) {
+
                     case 'newest':
-                        $q->orderBy('created_at', 'desc');
+                        $q->orderBy('products.created_at', 'desc');
                         break;
+
                     case 'oldest':
-                        $q->orderBy('created_at', 'asc');
+                        $q->orderBy('products.created_at', 'asc');
                         break;
+
                     case 'best':
-                        $q->orderBy('rating', 'desc'); // pastikan ada field ini
+                        $q->orderByDesc('total_clicks');
                         break;
+
                     case 'worst':
-                        $q->orderBy('rating', 'asc');
+                        $q->orderBy('total_clicks', 'asc');
                         break;
                 }
+            }, function ($q) {
+
+                $q->latest('products.created_at');
             })
 
-            ->latest()
             ->paginate(12);
 
-        return view('pages/home/gallery', compact('products'));
+        return view('pages.home.gallery', compact('products'));
     }
 
     public function compare(Request $request, CompareService $service)
     {
         // Validasi & sanitasi ids
-        $ids = collect(explode(',', (string)$request->ids))
+        $ids = collect(explode(',', (string) $request->ids))
             ->filter(fn($id) => is_numeric($id))
+            ->unique()
             ->take(2)
-            ->values()
-            ->toArray();
+            ->values();
 
-        if (count($ids) !== 2) {
-            abort(400, 'Harus 2 produk valid');
+        // Validasi jumlah produk
+        if ($ids->count() !== 2) {
+
+            return view('pages.home.compare.error', [
+                'products' => collect(),
+                'error' => 'Pilih tepat 2 produk untuk dibandingkan'
+            ]);
         }
 
-        // Ambil produk + eager load specs
-        $products = Product::whereIn('id', $ids)
-            ->with(['specifications.specification.category'])
+        // Ambil produk + eager load
+        $products = Product::query()
+            ->whereIn('id', $ids)
+            ->with([
+                'specifications.specification.category'
+            ])
             ->get()
             ->keyBy('id');
 
+        // Pastikan produk ditemukan
         if ($products->count() !== 2) {
-            abort(404, 'Produk tidak ditemukan');
+
+            return view('pages.home.compare.error', [
+                'products' => collect(),
+                'error' => 'Produk tidak ditemukan'
+            ]);
         }
 
-        $productA = $products[$ids[0]];
-        $productB = $products[$ids[1]];
+        // Mapping product
+        $productA = $products->get($ids[0]);
+        $productB = $products->get($ids[1]);
 
-        // Jalankan engine
+        // Safety check
+        if (!$productA || !$productB) {
+
+            return view('pages.home.compare.error', [
+                'products' => collect(),
+                'error' => 'Produk compare tidak valid'
+            ]);
+        }
+
+        // Compare engine
         $result = $service->compare($productA, $productB);
 
-        return view('pages/home/compare', [
+        return view('pages.home.compare.index', [
             'productA' => $productA,
             'productB' => $productB,
-            'percentA' => $result['percentA'],
-            'percentB' => $result['percentB'],
-            'metricsA' => $result['metricsA'],
-            'metricsB' => $result['metricsB'],
-            'reasons'  => $result['reasons'],
+            'percentA' => $result['percentA'] ?? 0,
+            'percentB' => $result['percentB'] ?? 0,
+            'metricsA' => $result['metricsA'] ?? [],
+            'metricsB' => $result['metricsB'] ?? [],
+            'reasons'  => $result['reasons'] ?? [],
         ]);
+    }
+
+    public function contact()
+    {
+        return view('pages.home.contact');
     }
 }
