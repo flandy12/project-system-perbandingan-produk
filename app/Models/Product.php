@@ -70,4 +70,11 @@ class Product extends Model
             'specification_id'
         );
     }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    
 }

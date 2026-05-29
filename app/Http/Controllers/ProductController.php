@@ -9,6 +9,7 @@ use App\Models\SpecificationGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -42,6 +43,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'specifications' => 'array',
             'specifications.*' => 'nullable|string',
+            'production_year' => 'nullable|integer|between:1900,' . date('Y'),
         ]);
 
         DB::transaction(function () use ($request, $validated) {
@@ -58,6 +60,7 @@ class ProductController extends Controller
                 'stock' => $validated['stock'],
                 'category_id' => $validated['category_id'],
                 'image' => $imagePath,
+                'production_year' => $validated['production_year'],
                 'status' => 'disable'
             ]);
 
@@ -106,6 +109,7 @@ class ProductController extends Controller
             'status' => 'sometimes|in:active,disable',
             'category_id' => 'sometimes|exists:categories,id',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'production_year' => 'nullable|integer|between:1900,' . date('Y'),
         ]);
 
         DB::transaction(function () use ($validated, $request, $product) {

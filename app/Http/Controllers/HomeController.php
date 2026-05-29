@@ -82,8 +82,8 @@ class HomeController extends Controller
         })->when($request->price_max, function ($q) use ($request) {
             $q->where('products.price', '<=', $request->price_max);
         }) // FILTER TANGGAL
-            ->when($request->date, function ($q) use ($request) {
-                $q->whereDate('products.created_at', $request->date);
+            ->when($request->year, function ($q) use ($request) {
+                $q->whereYear('products.created_at', $request->year);
             })
 
             // GROUP BY WAJIB
@@ -186,5 +186,43 @@ class HomeController extends Controller
     public function contact()
     {
         return view('pages.home.contact');
+    }
+
+    public function show(Product $product)
+    {
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei'];
+        $ratings = [4.1, 4.2, 4.4, 4.6, 4.8];
+
+        $product->load([
+            'category',
+            'ratings.user'
+        ]);
+        $totalRatings = $product->ratings()->count();
+
+        $averageRating = round(
+            $product->ratings()->avg('rating'),
+            1
+        );
+
+        $ratingPercent = [];
+
+        for ($i = 1; $i <= 5; $i++) {
+
+            $count = $product->ratings()
+                ->where('rating', $i)
+                ->count();
+
+            $ratingPercent[$i] = $totalRatings
+                ? round(($count / $totalRatings) * 100)
+                : 0;
+        }
+        return view('pages.home.show', [
+            'product' => $product,
+            'averageRating' => $averageRating,
+            'totalRatings' => $totalRatings,
+            'ratingPercent' => $ratingPercent,
+            'months' => $months,
+            'ratings' => $ratings
+        ]);
     }
 }

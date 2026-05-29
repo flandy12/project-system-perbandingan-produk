@@ -152,7 +152,7 @@
                 <div class="flex gap-3">
 
                     <!-- detail -->
-                    <a :href="selectedProduct ? '/product/' + selectedProduct.id : '#'"
+                    <a :href="selectedProduct ? '/item/' + selectedProduct.id : '#'"
                         class="flex-1 text-center py-2 bg-sky-600 text-white rounded hover:bg-sky-700">
                         Lihat Detail
                     </a>

@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductFinalScoreController;
 use App\Http\Controllers\ProductSalesStatController;
 use App\Http\Controllers\ProductSpecificationController;
 use App\Http\Controllers\ProductSpecificationScoreController;
+use App\Http\Controllers\RatingController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\ScoreWeightController;
@@ -23,13 +24,13 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Role;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/item/{product}', [HomeController::class, 'show'])->name('product.show');
 Route::get('/gallery', [HomeController::class, 'gallery'])->name('gallery.index');
 Route::post('/track/product-click/{product}', [TrackingController::class, 'productClick']);
 Route::post('/track/page-view', [TrackingController::class, 'pageView']);
 Route::get('/compare', [HomeController::class, 'compare'])->name('versus.index');
 Route::get('/hubungi-kami', [HomeController::class, 'contact'])->name('contact.index');
-
-
+Route::post('/ratings', [RatingController::class, 'store']);
 
 
 
@@ -69,4 +70,6 @@ Route::middleware([
     Route::resource('product-final-scores', ProductFinalScoreController::class);
     Route::resource('top-product', ProductSalesStatController::class);
 
+    Route::put('/ratings/{rating}', [RatingController::class, 'update']);
+    Route::delete('/ratings/{rating}', [RatingController::class, 'destroy']);
 });

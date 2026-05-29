@@ -21,8 +21,9 @@
                         <input type="number" name="price_max" placeholder="Harga Max"
                             class="border rounded px-3 py-2 text-sm w-32">
 
-                        <!-- Tanggal -->
-                        <input type="date" name="date" class="border rounded px-3 py-2 text-sm">
+                        <!-- Tahun Saja -->
+                        <input type="number" name="year" min="1900" max="2100" placeholder="2026"
+                            class="border rounded px-3 py-2 text-sm">
 
                         <button type="submit" class="bg-[#111727] text-white px-4 py-2 rounded">
                             Filter
