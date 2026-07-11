@@ -12,7 +12,8 @@ class LoginResponse implements LoginResponseContract
 
         if ($user->hasAnyRole([
             'admin',
-            'super admin'
+            'super admin',
+            'owner'
         ])) {
             return redirect()->route('dashboard');
         }

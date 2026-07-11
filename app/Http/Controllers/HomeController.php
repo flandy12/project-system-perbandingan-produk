@@ -69,53 +69,81 @@ class HomeController extends Controller
             'date' => 'nullable|date',
         ]);
 
-        $products = Product::query()->select(
-            'products.*',
-            DB::raw('COUNT(product_clicks.id) as total_clicks')
-        )->leftJoin(
-            'product_clicks',
-            'products.id',
-            '=',
-            'product_clicks.product_id'
-        )->when($request->price_min, function ($q) use ($request) {
+        $products = Product::query()
+        ->when($request->price_min, function ($q) use ($request) {
             $q->where('products.price', '>=', $request->price_min);
-        })->when($request->price_max, function ($q) use ($request) {
+        })
+        ->when($request->price_max, function ($q) use ($request) {
             $q->where('products.price', '<=', $request->price_max);
-        }) // FILTER TANGGAL
-            ->when($request->year, function ($q) use ($request) {
-                $q->whereYear('products.created_at', $request->year);
-            })
+        })
+        ->when($request->year, function ($q) use ($request) {
+            $q->whereYear('products.created_at', $request->year);
+        })
+        ->when($request->sort, function ($q) use ($request) {
 
-            // GROUP BY WAJIB
-            ->groupBy('products.id')
+            switch ($request->sort) {
 
-            // SORTING
-            ->when($request->sort, function ($q) use ($request) {
+                case 'newest':
+                    $q->orderBy('products.created_at', 'desc');
+                    break;
 
-                switch ($request->sort) {
+                case 'oldest':
+                    $q->orderBy('products.created_at', 'asc');
+                    break;
+            }
 
-                    case 'newest':
-                        $q->orderBy('products.created_at', 'desc');
-                        break;
+        }, function ($q) {
+            $q->latest('products.created_at');
+        })
+        ->paginate(12);
 
-                    case 'oldest':
-                        $q->orderBy('products.created_at', 'asc');
-                        break;
+        // $products = Product::query()->select(
+        //     'products.*',
+        //     DB::raw('COUNT(product_clicks.id) as total_clicks')
+        // )->leftJoin(
+        //     'product_clicks',
+        //     'products.id',
+        //     '=',
+        //     'product_clicks.product_id'
+        // )->when($request->price_min, function ($q) use ($request) {
+        //     $q->where('products.price', '>=', $request->price_min);
+        // })->when($request->price_max, function ($q) use ($request) {
+        //     $q->where('products.price', '<=', $request->price_max);
+        // }) // FILTER TANGGAL
+        //     ->when($request->year, function ($q) use ($request) {
+        //         $q->whereYear('products.created_at', $request->year);
+        //     })
 
-                    case 'best':
-                        $q->orderByDesc('total_clicks');
-                        break;
+        //     // GROUP BY WAJIB
+        //     ->groupBy('products.id')
 
-                    case 'worst':
-                        $q->orderBy('total_clicks', 'asc');
-                        break;
-                }
-            }, function ($q) {
+        //     // SORTING
+        //     ->when($request->sort, function ($q) use ($request) {
 
-                $q->latest('products.created_at');
-            })
+        //         switch ($request->sort) {
 
-            ->paginate(12);
+        //             case 'newest':
+        //                 $q->orderBy('products.created_at', 'desc');
+        //                 break;
+
+        //             case 'oldest':
+        //                 $q->orderBy('products.created_at', 'asc');
+        //                 break;
+
+        //             case 'best':
+        //                 $q->orderByDesc('total_clicks');
+        //                 break;
+
+        //             case 'worst':
+        //                 $q->orderBy('total_clicks', 'asc');
+        //                 break;
+        //         }
+        //     }, function ($q) {
+
+        //         $q->latest('products.created_at');
+        //     })
+
+        //     ->paginate(12);
 
         return view('pages.home.gallery', compact('products'));
     }
@@ -172,7 +200,7 @@ class HomeController extends Controller
         // Compare engine
         $result = $service->compare($productA, $productB);
 
-        return view('pages.home.compare.index', [
+        return view('pages.home.compare', [
             'productA' => $productA,
             'productB' => $productB,
             'percentA' => $result['percentA'] ?? 0,

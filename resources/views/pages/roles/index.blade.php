@@ -37,9 +37,11 @@
             <div class="bg-white p-6 rounded shadow">
                 <div class="flex justify-between mb-4">
                     <h2 class="text-xl font-semibold">Role Management</h2>
+                    @haspermission('role.create')
                     <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
                         Tambah Role
                     </button>
+                    @endhaspermission
                 </div>
 
                 <table class="min-w-full border">
