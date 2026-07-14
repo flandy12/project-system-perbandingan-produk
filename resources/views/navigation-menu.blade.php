@@ -34,69 +34,112 @@
                             </x-slot>
 
                             <x-slot name="content">
-                                <x-dropdown-link href="{{ route('users.index') }}">
-                                    {{ __('Users') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link href="{{ route('roles.index') }}">
-                                    {{ __('Role') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link href="{{ route('permissions.index') }}">
-                                    {{ __('Permission') }}
-                                </x-dropdown-link>
+                                @can('view.user')
+                                    <x-dropdown-link href="{{ route('users.index') }}">
+                                        Users
+                                    </x-dropdown-link>
+                                @endcan
+
+                                @can('view.role')
+                                    <x-dropdown-link href="{{ route('roles.index') }}">
+                                        Role
+                                    </x-dropdown-link>
+                                @endcan
+
+                                @can('view.permission')
+                                    <x-dropdown-link href="{{ route('permissions.index') }}">
+                                        Permission
+                                    </x-dropdown-link>
+                                @endcan
+
                             </x-slot>
 
                         </x-dropdown>
                     </div>
 
-                    <x-nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.index')">
-                        {{ __('Product') }}
-                    </x-nav-link>
+                    @can('view.product')
+                        <x-nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.*')">
 
-                    <x-nav-link href="{{ route('category.index') }}" :active="request()->routeIs('category.index')">
-                        {{ __('Category') }}
-                    </x-nav-link>
+                            Product
 
-                    <div class="flex items-center">
-                        <x-dropdown align="left" width="48" dropdownClasses="mt-0"
-                            class="hidden sm:flex sm:items-center sm:ms-6">
-                            <x-slot name="trigger">
-                                <button
-                                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
-                                    {{ __('Specification Menagement') }}
+                        </x-nav-link>
+                    @endcan
 
-                                    <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                </button>
-                            </x-slot>
+                    @can('view.category')
+                        <x-nav-link href="{{ route('category.index') }}" :active="request()->routeIs('category.*')">
 
-                            <x-slot name="content">
-                                <x-dropdown-link href="{{ route('specification-groups.index') }}">
-                                    {{ __('Specification Group') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link href="{{ route('specifications.index') }}">
-                                    {{ __('Specification') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link href="{{ route('product-specifications.index') }}">
-                                    {{ __('Product Specifications') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link href="{{ route('product-specification-scores.index') }}">
-                                    {{ __('Product Specification Scores') }}
-                                </x-dropdown-link>
-                            </x-slot>
+                            Category
 
-                        </x-dropdown>
-                    </div>
+                        </x-nav-link>
+                    @endcan
+                    @canany(['view.specification.group', 'view.specification', 'view.product.specification',
+                        'view.product.specification.score'])
+                        <div class="flex items-center">
+                            <x-dropdown align="left" width="48" dropdownClasses="mt-0"
+                                class="hidden sm:flex sm:items-center sm:ms-6">
 
-                    <x-nav-link href="{{ route('discount.index') }}" :active="request()->routeIs('discount.index')">
-                        {{ __('Discount') }}
-                    </x-nav-link>
+                                <x-slot name="trigger">
+                                    <button
+                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
 
-                    <x-nav-link href="{{ route('headline-slide.index') }}" :active="request()->routeIs('headline-slide.index')">
-                        {{ __('Headline Slider') }}
-                    </x-nav-link>
+                                        {{ __('Specification Management') }}
+
+                                        <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                </x-slot>
+
+                                <x-slot name="content">
+
+                                    @can('view.specification.group')
+                                        <x-dropdown-link href="{{ route('specification-groups.index') }}">
+                                            {{ __('Specification Group') }}
+                                        </x-dropdown-link>
+                                    @endcan
+
+                                    @can('view.specification')
+                                        <x-dropdown-link href="{{ route('specifications.index') }}">
+                                            {{ __('Specification') }}
+                                        </x-dropdown-link>
+                                    @endcan
+
+                                    @can('view.product.specification')
+                                        <x-dropdown-link href="{{ route('product-specifications.index') }}">
+                                            {{ __('Product Specifications') }}
+                                        </x-dropdown-link>
+                                    @endcan
+
+                                    @can('view.product.specification.score')
+                                        <x-dropdown-link href="{{ route('product-specification-scores.index') }}">
+                                            {{ __('Product Specification Scores') }}
+                                        </x-dropdown-link>
+                                    @endcan
+
+                                </x-slot>
+
+                            </x-dropdown>
+                        </div>
+                    @endcanany
+
+                    @can('view.discount')
+                        <x-nav-link href="{{ route('discount.index') }}" :active="request()->routeIs('discount.*')">
+
+                            Discount
+
+                        </x-nav-link>
+                    @endcan
+
+                    @can('view.headline')
+                        <x-nav-link href="{{ route('headline-slide.index') }}" :active="request()->routeIs('headline-slide.*')">
+
+                            Headline Slider
+
+                        </x-nav-link>
+                    @endcan
 
                     <x-nav-link href="{{ route('top-product.index') }}" :active="request()->routeIs('top-product.index')">
                         {{ __('Top Sales') }}

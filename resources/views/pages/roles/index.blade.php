@@ -37,11 +37,11 @@
             <div class="bg-white p-6 rounded shadow">
                 <div class="flex justify-between mb-4">
                     <h2 class="text-xl font-semibold">Role Management</h2>
-                    @haspermission('role.create')
-                    <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
-                        Tambah Role
-                    </button>
-                    @endhaspermission
+                    @can('create.role')
+                        <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
+                            Tambah Role
+                        </button>
+                    @endcan
                 </div>
 
                 <table class="min-w-full border">
@@ -50,7 +50,9 @@
                             <th class="border px-4 py-2">Role</th>
                             <th class="border px-4 py-2">Guard</th>
                             <th class="border px-4 py-2">Permission</th>
-                            <th class="border px-4 py-2">Aksi</th>
+                            @canany(['edit.role', 'delete.role'])
+                                <th class="border px-4 py-2">Aksi</th>
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -65,21 +67,36 @@
                                 <td class="border px-4 py-2 text-center">
                                     {{ $role->permissions->pluck('name')->join(', ') }}
                                 </td>
-                                <td class="border px-4 py-2 text-center space-x-2">
-                                    <button
-                                        @click="openEdit({ id: {{ $role->id }}, name: @js($role->name), permissions: @js($role->permissions->pluck('name'))})"
-                                        class="text-green-600">
-                                        Edit
-                                    </button>
+                                @canany(['edit.role', 'delete.role'])
+                                    <td class="border px-4 py-2 text-center space-x-2">
 
-                                    <form action="{{ route('roles.destroy', $role) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button onclick="return confirm('Hapus role?')" class="text-red-600">
-                                            Delete
-                                        </button>
-                                    </form>
-                                </td>
+                                        @can('edit.role')
+                                            <button
+                                                @click="openEdit({
+                id: {{ $role->id }},
+                name: @js($role->name),
+                permissions: @js($role->permissions->pluck('name'))
+            })"
+                                                class="text-green-600">
+                                                Edit
+                                            </button>
+                                        @endcan
+
+                                        @can('delete.role')
+                                            <form action="{{ route('roles.destroy', $role) }}" method="POST" class="inline">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button onclick="return confirm('Hapus role?')" class="text-red-600">
+                                                    Delete
+                                                </button>
+
+                                            </form>
+                                        @endcan
+
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>
@@ -92,60 +109,61 @@
         </div>
 
         <!-- MODAL -->
-        <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
-            <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded">
+        @canany(['create.role', 'edit.role'])
+            <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
+                <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded">
 
-                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Role' : 'Tambah Role'"></h3>
+                    <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Role' : 'Tambah Role'"></h3>
 
-                <form :action="isEdit ? `/roles/${form.id}` : `{{ route('roles.store') }}`" method="POST"
-                    class="space-y-4">
-                    @csrf
+                    <form :action="isEdit ? `/roles/${form.id}` : `{{ route('roles.store') }}`" method="POST"
+                        class="space-y-4">
+                        @csrf
 
-                    <template x-if="isEdit">
-                        <input type="hidden" name="_method" value="PUT">
-                    </template>
+                        <template x-if="isEdit">
+                            <input type="hidden" name="_method" value="PUT">
+                        </template>
 
-                    <input type="text" name="name" x-model="form.name" class="w-full border rounded px-3 py-2"
-                        placeholder="Nama Role">
+                        <input type="text" name="name" x-model="form.name" class="w-full border rounded px-3 py-2"
+                            placeholder="Nama Role">
 
-                    @error('name')
-                        <div x-show="showErrors" class="text-red-500 text-sm">
-                            {{ $message }}
+                        @error('name')
+                            <div x-show="showErrors" class="text-red-500 text-sm">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                        <div class="border rounded p-3 max-h-48 overflow-y-auto">
+                            <p class="font-semibold mb-2">Permissions</p>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                @foreach ($permissions as $permission)
+                                    <label class="flex items-center gap-2 text-sm">
+                                        <input type="checkbox" value="{{ $permission->name }}" x-model="form.permissions"
+                                            name="permissions[]" class="rounded border">
+                                        {{ $permission->name }}
+                                    </label>
+                                @endforeach
+                            </div>
                         </div>
-                    @enderror
 
-                    <div class="border rounded p-3 max-h-48 overflow-y-auto">
-                        <p class="font-semibold mb-2">Permissions</p>
+                        @error('permissions')
+                            <div x-show="showErrors" class="text-red-500 text-sm">
+                                {{ $message }}
+                            </div>
+                        @enderror
 
-                        <div class="grid grid-cols-2 gap-2">
-                            @foreach ($permissions as $permission)
-                                <label class="flex items-center gap-2 text-sm">
-                                    <input type="checkbox" value="{{ $permission->name }}" x-model="form.permissions"
-                                        name="permissions[]" class="rounded border">
-                                    {{ $permission->name }}
-                                </label>
-                            @endforeach
+
+                        <div class="flex justify-end gap-3">
+                            <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
+                                Batal
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
+                                Simpan
+                            </button>
                         </div>
-                    </div>
-
-                    @error('permissions')
-                        <div x-show="showErrors" class="text-red-500 text-sm">
-                            {{ $message }}
-                        </div>
-                    @enderror
-
-
-                    <div class="flex justify-end gap-3">
-                        <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
-                            Batal
-                        </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
-                            Simpan
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
-
+        @endcanany
         </div>
 </x-app-layout>

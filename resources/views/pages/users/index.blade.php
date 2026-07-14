@@ -56,7 +56,7 @@
                             <th class="border px-4 py-2">Email</th>
                             <th class="border px-4 py-2">Role</th>
                             <th class="border px-4 py-2">is_active</th>
-                            @can(['user.update', 'user.delete'])
+                            @can(['user.edit', 'user.delete'])
                                 <th class="border px-4 py-2">Aksi</th>
                             @endcan
                         </tr>
@@ -76,7 +76,7 @@
                                         {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
                                     </span>
                                 </td>
-                                @can(['user.update', 'user.delete'])
+                                @can(['user.edit', 'user.delete'])
                                     <td class="border px-4 py-2 space-x-2 text-center">
                                         <button @click="openEdit({{ Js::from($user) }})" class="text-green-600">
                                             Edit
@@ -103,6 +103,7 @@
         </div>
 
         <!-- MODAL -->
+        @can(['user.edit', 'user.delete'])
         <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
             <div @click.away="open=false" class="bg-white w-full max-w-lg p-6 rounded">
 
@@ -173,6 +174,7 @@
                 </form>
             </div>
         </div>
+        @endcan
     </div>
 
 </x-app-layout>

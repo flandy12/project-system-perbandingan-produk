@@ -7,9 +7,11 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold">Discount Management</h2>
 
-                    <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
-                        Tambah Discount
-                    </button>
+                    @can('create.discount')
+                        <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
+                            Tambah Discount
+                        </button>
+                    @endcan
 
                 </div>
 
@@ -21,7 +23,10 @@
                                 <th class="border px-4 py-2">Product</th>
                                 <th class="border px-4 py-2 text-center">Diskon</th>
                                 <th class="border px-4 py-2 text-center">Periode</th>
-                                <th class="border px-4 py-2 text-center">Aksi</th>
+
+                                @canany(['edit.discount', 'delete.discount'])
+                                    <th class="border px-4 py-2 text-center">Aksi</th>
+                                @endcanany
                             </tr>
                         </thead>
                         <tbody>
@@ -45,32 +50,39 @@
                                         {{ $discount->end_date->format('d M Y') }}
                                     </td>
 
-                                    <td class="border px-4 py-2 text-center space-x-2">
+                                    @canany(['edit.discount', 'delete.discount'])
+                                        <td class="border px-4 py-2 text-center space-x-2">
 
-                                        <button
-                                            @click="openEdit({
-                                                id: {{ $discount->id }},
-                                                product_id: {{ $discount->product_id }},
-                                                percentage: {{ $discount->percentage }},
-                                                start_date: '{{ $discount->start_date->format('Y-m-d') }}',
-                                                end_date: '{{ $discount->end_date->format('Y-m-d') }}'
-                                            })"
-                                            class="text-green-600">
-                                            Edit
-                                        </button>
+                                            @can('edit.discount')
+                                                <button
+                                                    @click="openEdit({
+                id: {{ $discount->id }},
+                product_id: {{ $discount->product_id }},
+                percentage: {{ $discount->percentage }},
+                start_date: '{{ $discount->start_date->format('Y-m-d') }}',
+                end_date: '{{ $discount->end_date->format('Y-m-d') }}'
+            })"
+                                                    class="text-green-600">
+                                                    Edit
+                                                </button>
+                                            @endcan
 
+                                            @can('delete.discount')
+                                                <form action="{{ route('discount.destroy', $discount) }}" method="POST"
+                                                    class="inline">
 
-                                        <form action="{{ route('discount.index') }}/{{ $discount->id }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button onclick="return confirm('Hapus discount ini?')"
-                                                class="text-red-600">
-                                                Delete
-                                            </button>
-                                        </form>
+                                                    @csrf
+                                                    @method('DELETE')
 
-                                    </td>
+                                                    <button onclick="return confirm('Hapus discount ini?')"
+                                                        class="text-red-600">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            @endcan
+
+                                        </td>
+                                    @endcanany
                                 </tr>
                             @empty
                                 <tr>
@@ -92,6 +104,7 @@
         </div>
 
         <!-- MODAL CREATE / EDIT -->
+        @canany(['create.discount', 'edit.discount'])
         <div x-show="open" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
             <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded">
                 <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Discount' : 'Tambah Discount'"></h3>
@@ -138,6 +151,7 @@
                 </form>
             </div>
         </div>
+        @endcanany
 
     </div>
 

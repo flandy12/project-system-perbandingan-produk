@@ -7,9 +7,11 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold">Headline Management</h2>
 
-                    <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
-                        Tambah Headline
-                    </button>
+                    @can('create.headline')
+                        <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
+                            Tambah Headline
+                        </button>
+                    @endcan
                 </div>
 
                 <!-- TABLE -->
@@ -20,7 +22,9 @@
                             <th class="border px-3 py-2">Judul</th>
                             <th class="border px-3 py-2">Urutan</th>
                             <th class="border px-3 py-2">Status</th>
-                            <th class="border px-3 py-2">Aksi</th>
+                            @canany(['edit.headline', 'delete.headline'])
+                                <th class="border px-3 py-2">Aksi</th>
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -50,20 +54,31 @@
                                     </span>
                                 </td>
 
-                                <td class="border px-3 py-2 text-center space-x-2">
-                                    <button @click="openEdit({{ Js::from($headline) }})" class="text-green-600">
-                                        Edit
-                                    </button>
+                                @canany(['edit.headline', 'delete.headline'])
+                                    <td class="border px-3 py-2 text-center space-x-2">
 
-                                    <form action="{{ route('headline-slide.destroy', $headline) }}" method="POST"
-                                        class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button onclick="return confirm('Hapus headline?')" class="text-red-600">
-                                            Delete
-                                        </button>
-                                    </form>
-                                </td>
+                                        @can('edit.headline')
+                                            <button @click="openEdit({{ Js::from($headline) }})" class="text-green-600">
+                                                Edit
+                                            </button>
+                                        @endcan
+
+                                        @can('delete.headline')
+                                            <form action="{{ route('headline-slide.destroy', $headline) }}" method="POST"
+                                                class="inline">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button onclick="return confirm('Hapus headline?')" class="text-red-600">
+                                                    Delete
+                                                </button>
+
+                                            </form>
+                                        @endcan
+
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>
@@ -73,101 +88,103 @@
         </div>
 
         <!-- MODAL -->
-        <div x-show="open" x-cloak x-transition
-            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div @click.away="closeModal()" class="bg-white w-full max-w-lg p-6 rounded shadow-lg">
-                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Headline' : 'Tambah Headline'">
-                </h3>
+        @canany(['create.headline', 'edit.headline'])
+            <div x-show="open" x-cloak x-transition
+                class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div @click.away="closeModal()" class="bg-white w-full max-w-lg p-6 rounded shadow-lg">
+                    <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Headline' : 'Tambah Headline'">
+                    </h3>
 
-                <form
-                    :action="isEdit
-                        ?
-                        routeUpdate.replace(':id', form.id) :
-                        routeStore"
-                    method="POST" enctype="multipart/form-data" class="space-y-4">
-                    @csrf
-                    <template x-if="isEdit">
-                        <input type="hidden" name="_method" value="PUT">
-                    </template>
-
-                    <!-- TITLE -->
-                    <input type="text" name="title" x-model="form.title" class="w-full border rounded px-3 py-2"
-                        placeholder="Judul Headline">
-
-                    @error('title')
-                        <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
-                            {{ $message }}
-                        </p>
-                    @enderror
-
-                    <!-- SUBTITLE -->
-                    <textarea name="subtitle" x-model="form.subtitle" rows="3" class="w-full border rounded px-3 py-2"
-                        placeholder="Deskripsi singkat"></textarea>
-                    @error('subtitle')
-                        <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
-                            {{ $message }}
-                        </p>
-                    @enderror
-
-                    <!-- LINK -->
-                    <input type="url" name="link" x-model="form.link" class="w-full border rounded px-3 py-2"
-                        placeholder="Link (opsional)">
-
-                    @error('link')
-                        <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
-                            {{ $message }}
-                        </p>
-                    @enderror
-
-                    <!-- IMAGE -->
-                    <div>
-                        <input type="file" name="image" class="w-full border rounded px-3 py-2">
-
-                        <template x-if="form.image">
-                            <img :src="form.image" class="mt-2 w-full h-40 object-cover rounded">
+                    <form
+                        :action="isEdit
+                            ?
+                            routeUpdate.replace(':id', form.id) :
+                            routeStore"
+                        method="POST" enctype="multipart/form-data" class="space-y-4">
+                        @csrf
+                        <template x-if="isEdit">
+                            <input type="hidden" name="_method" value="PUT">
                         </template>
-                    </div>
 
-                    @error('image')
-                        <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
-                            {{ $message }}
-                        </p>
-                    @enderror
+                        <!-- TITLE -->
+                        <input type="text" name="title" x-model="form.title" class="w-full border rounded px-3 py-2"
+                            placeholder="Judul Headline">
 
-                    <!-- POSITION -->
-                    <input type="number" name="position" x-model="form.position"
-                        class="w-full border rounded px-3 py-2" min="1">
-                    @error('position')
-                        <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
-                            {{ $message }}
-                        </p>
-                    @enderror
+                        @error('title')
+                            <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
+                                {{ $message }}
+                            </p>
+                        @enderror
 
-                    <!-- STATUS -->
-                    <select name="is_active" x-model="form.is_active" class="w-full border rounded px-3 py-2">
-                        <option value="1">Aktif</option>
-                        <option value="0">Nonaktif</option>
-                    </select>
+                        <!-- SUBTITLE -->
+                        <textarea name="subtitle" x-model="form.subtitle" rows="3" class="w-full border rounded px-3 py-2"
+                            placeholder="Deskripsi singkat"></textarea>
+                        @error('subtitle')
+                            <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
+                                {{ $message }}
+                            </p>
+                        @enderror
 
-                    @error('is_active')
-                        <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
-                            {{ $message }}
-                        </p>
-                    @enderror
+                        <!-- LINK -->
+                        <input type="url" name="link" x-model="form.link" class="w-full border rounded px-3 py-2"
+                            placeholder="Link (opsional)">
 
-                    <!-- ACTION -->
-                    <div class="flex justify-end gap-3">
-                        <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
-                            Batal
-                        </button>
+                        @error('link')
+                            <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
+                                {{ $message }}
+                            </p>
+                        @enderror
 
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
-                            Simpan
-                        </button>
-                    </div>
-                </form>
+                        <!-- IMAGE -->
+                        <div>
+                            <input type="file" name="image" class="w-full border rounded px-3 py-2">
+
+                            <template x-if="form.image">
+                                <img :src="form.image" class="mt-2 w-full h-40 object-cover rounded">
+                            </template>
+                        </div>
+
+                        @error('image')
+                            <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        <!-- POSITION -->
+                        <input type="number" name="position" x-model="form.position"
+                            class="w-full border rounded px-3 py-2" min="1">
+                        @error('position')
+                            <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        <!-- STATUS -->
+                        <select name="is_active" x-model="form.is_active" class="w-full border rounded px-3 py-2">
+                            <option value="1">Aktif</option>
+                            <option value="0">Nonaktif</option>
+                        </select>
+
+                        @error('is_active')
+                            <p x-show="showErrors" x-cloak class="text-red-600 text-sm mt-1">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        <!-- ACTION -->
+                        <div class="flex justify-end gap-3">
+                            <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
+                                Batal
+                            </button>
+
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
+                                Simpan
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+        @endcanany
     </div>
 
     <!-- ALPINE -->

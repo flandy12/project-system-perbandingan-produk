@@ -6,9 +6,11 @@
 
                 <div class="flex justify-between mb-4">
                     <h2 class="text-xl font-semibold">Product Management</h2>
-                    <button onclick="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
-                        Tambah Produk
-                    </button>
+                    @can('create.product')
+                        <button onclick="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
+                            Tambah Produk
+                        </button>
+                    @endcan
                 </div>
 
                 <table class="min-w-full border">
@@ -20,7 +22,9 @@
                             <th class="border px-4 py-2">Harga</th>
                             <th class="border px-4 py-2">Stok</th>
                             <th class="border px-4 py-2">Status</th>
-                            <th class="border px-4 py-2">Aksi</th>
+                            @canany(['edit.product', 'delete.product'])
+                                <th class="border px-4 py-2">Aksi</th>
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -32,20 +36,29 @@
                                 <td class="border px-4 py-2 text-center">Rp {{ number_format($product->price) }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $product->stock }}</td>
                                 <td class="border px-4 py-2 text-center capitalize">{{ $product->status ?? '' }}</td>
-                                <td class="border px-4 py-2 text-center space-x-2">
-                                    <button onclick='openEdit(@json($product))' class="text-green-600">
-                                        Edit
-                                    </button>
+                                @canany(['edit.product', 'delete.product'])
+                                    <td class="border px-4 py-2 text-center space-x-2">
 
-                                    <form action="{{ route('products.destroy', $product) }}" method="POST"
-                                        class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button onclick="return confirm('Hapus produk?')" class="text-red-600">
-                                            Delete
-                                        </button>
-                                    </form>
-                                </td>
+                                        @can('edit.roduct')
+                                            <button onclick='openEdit(@json($product))' class="text-green-600">
+                                                Edit
+                                            </button>
+                                        @endcan
+
+                                        @can('delete.product')
+                                            <form action="{{ route('products.destroy', $product) }}" method="POST"
+                                                class="inline">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button onclick="return confirm('Hapus produk?')" class="text-red-600">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        @endcan
+
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>
@@ -58,6 +71,7 @@
         </div>
 
         <!-- MODAL -->
+        @canany(['create.product', 'edit.roduct'])
         <div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
             <div class="bg-white w-full max-w-xl p-6 rounded">
 
@@ -370,7 +384,7 @@
                 </form>
             </div>
         </div>
-
+        @endcanany
     </div>
 
     @push('scripts')

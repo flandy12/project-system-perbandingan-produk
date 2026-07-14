@@ -7,9 +7,11 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold">Category Management</h2>
 
-                    <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
-                        Tambah Kategori
-                    </button>
+                    @can('create.category')
+                        <button @click="openCreate()" class="px-4 py-2 bg-blue-600 text-white rounded">
+                            Tambah Kategori
+                        </button>
+                    @endcan
                 </div>
 
                 <!-- TABLE -->
@@ -17,11 +19,13 @@
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="border px-3 py-2">
-                               No
+                                No
                             </th>
                             <th class="border px-3 py-2">Nama</th>
                             <th class="border px-3 py-2">Status</th>
-                            <th class="border px-3 py-2">Aksi</th>
+                            @canany(['edit.category', 'delete.category'])
+                                <th class="border px-3 py-2">Aksi</th>
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -42,20 +46,30 @@
                                     </span>
                                 </td>
 
-                                <td class="border px-3 py-2 text-center space-x-2">
-                                    <button @click="openEdit({{ Js::from($category) }})" class="text-green-600">
-                                        Edit
-                                    </button>
+                                @canany(['edit.category', 'delete.category'])
+                                    <td class="border px-3 py-2 text-center space-x-2">
 
-                                    <form action="{{ route('category.destroy', $category) }}" method="POST"
-                                        class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button onclick="return confirm('Hapus kategori?')" class="text-red-600">
-                                            Delete
-                                        </button>
-                                    </form>
-                                </td>
+                                        @can('edit.category')
+                                            <button @click="openEdit({{ Js::from($category) }})" class="text-green-600">
+                                                Edit
+                                            </button>
+                                        @endcan
+
+                                        @can('delete.category')
+                                            <form action="{{ route('category.destroy', $category) }}" method="POST"
+                                                class="inline">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button onclick="return confirm('Hapus kategori?')" class="text-red-600">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        @endcan
+
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>
@@ -65,56 +79,58 @@
         </div>
 
         <!-- MODAL -->
-        <div x-show="open" x-cloak x-transition
-            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded shadow-lg">
-                <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Kategori' : 'Tambah Kategori'"></h3>
+        @canany(['create.category', 'edit.category'])
+            <div x-show="open" x-cloak x-transition
+                class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div @click.away="closeModal()" class="bg-white w-full max-w-md p-6 rounded shadow-lg">
+                    <h3 class="text-lg font-semibold mb-4" x-text="isEdit ? 'Edit Kategori' : 'Tambah Kategori'"></h3>
 
-                <form
-                    :action="isEdit
-                        ?
-                        routeUpdate.replace(':id', form.id) :
-                        routeStore"
-                    method="POST" class="space-y-4">
-                    @csrf
-                    <template x-if="isEdit">
-                        <input type="hidden" name="_method" value="PUT">
-                    </template>
+                    <form
+                        :action="isEdit
+                            ?
+                            routeUpdate.replace(':id', form.id) :
+                            routeStore"
+                        method="POST" class="space-y-4">
+                        @csrf
+                        <template x-if="isEdit">
+                            <input type="hidden" name="_method" value="PUT">
+                        </template>
 
-                    <!-- NAME -->
-                    <input type="text" name="name" x-model="form.name" class="w-full border rounded px-3 py-2"
-                        placeholder="Nama kategori">
-                    @error('name')
-                        <p x-show="showErrors" x-cloak class="text-red-600 text-sm">
-                            {{ $message }}
-                        </p>
-                    @enderror
+                        <!-- NAME -->
+                        <input type="text" name="name" x-model="form.name" class="w-full border rounded px-3 py-2"
+                            placeholder="Nama kategori">
+                        @error('name')
+                            <p x-show="showErrors" x-cloak class="text-red-600 text-sm">
+                                {{ $message }}
+                            </p>
+                        @enderror
 
-                    <!-- STATUS -->
-                    <select name="is_active" x-model="form.is_active" class="w-full border rounded px-3 py-2">
-                        <option value="1">Aktif</option>
-                        <option value="0">Nonaktif</option>
-                    </select>
+                        <!-- STATUS -->
+                        <select name="is_active" x-model="form.is_active" class="w-full border rounded px-3 py-2">
+                            <option value="1">Aktif</option>
+                            <option value="0">Nonaktif</option>
+                        </select>
 
-                    @error('is_active')
-                        <p x-show="showErrors" x-cloak class="text-red-600 text-sm">
-                            {{ $message }}
-                        </p>
-                    @enderror
+                        @error('is_active')
+                            <p x-show="showErrors" x-cloak class="text-red-600 text-sm">
+                                {{ $message }}
+                            </p>
+                        @enderror
 
-                    <!-- ACTION -->
-                    <div class="flex justify-end gap-3">
-                        <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
-                            Batal
-                        </button>
+                        <!-- ACTION -->
+                        <div class="flex justify-end gap-3">
+                            <button type="button" @click="closeModal()" class="px-4 py-2 border rounded">
+                                Batal
+                            </button>
 
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
-                            Simpan
-                        </button>
-                    </div>
-                </form>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
+                                Simpan
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+        @endcanany
     </div>
 
     <!-- ALPINE -->
