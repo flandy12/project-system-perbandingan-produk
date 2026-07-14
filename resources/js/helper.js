@@ -1,15 +1,21 @@
 export default function createCompareApp() {
     return {
-        active: 'top',
+        active: "top",
         modalOpen: false,
         selectedProduct: null,
         items: [],
         redirecting: false,
 
-        activeClass: 'bg-sky-100 text-sky-700',
-        defaultClass: 'border',
+        activeClass: "bg-sky-100 text-sky-700",
+        defaultClass: "border",
 
         init() {
+            if (window.location.pathname === "/compare") {
+                localStorage.removeItem("compare_items");
+                this.items = [];
+                return;
+            }
+
             try {
                 const saved = localStorage.getItem("compare_items");
                 const parsed = saved ? JSON.parse(saved) : [];
@@ -18,7 +24,6 @@ export default function createCompareApp() {
                 this.items = [];
             }
 
-            // sync antar tab
             window.addEventListener("storage", (e) => {
                 if (e.key === "compare_items") {
                     this.items = JSON.parse(e.newValue || "[]");
@@ -27,13 +32,12 @@ export default function createCompareApp() {
 
             this.initScrollSpy();
         },
-
         toggle(id) {
             if (!id) return;
             id = String(id);
 
             if (this.items.includes(id)) {
-                this.items = this.items.filter(i => i !== id);
+                this.items = this.items.filter((i) => i !== id);
                 this.save();
                 return;
             }
@@ -57,9 +61,13 @@ export default function createCompareApp() {
         },
 
         redirect() {
-            window.location.href = `/compare?ids=${this.items.join(",")}`;
-        },
+            const ids = this.items.join(",");
 
+            localStorage.removeItem("compare_items");
+            this.items = [];
+
+            window.location.href = `/compare?ids=${ids}`;
+        },
 
         isSelected(id) {
             if (!id || !Array.isArray(this.items)) return false;
@@ -72,12 +80,12 @@ export default function createCompareApp() {
         },
 
         formatPrice(price) {
-            if (!price) return 'Rp 0';
+            if (!price) return "Rp 0";
 
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0
+            return new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
             }).format(Number(price));
         },
 
@@ -88,22 +96,22 @@ export default function createCompareApp() {
             this.active = state;
 
             el.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+                behavior: "smooth",
+                block: "start",
             });
         },
 
         initScrollSpy() {
             const sections = [
-                { id: 'top-penjualan', key: 'top' },
-                { id: 'rekomendasi', key: 'rekomendasi' },
-                { id: 'discount', key: 'discount' },
+                { id: "top-penjualan", key: "top" },
+                { id: "rekomendasi", key: "rekomendasi" },
+                { id: "discount", key: "discount" },
             ];
 
             const handler = () => {
-                let current = 'top';
+                let current = "top";
 
-                sections.forEach(section => {
+                sections.forEach((section) => {
                     const el = document.getElementById(section.id);
                     if (!el) return;
 
@@ -117,7 +125,7 @@ export default function createCompareApp() {
                 this.active = current;
             };
 
-            window.addEventListener('scroll', handler, { passive: true });
-        }
-    }
+            window.addEventListener("scroll", handler, { passive: true });
+        },
+    };
 }
