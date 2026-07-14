@@ -136,14 +136,40 @@
                     @can('view.headline')
                         <x-nav-link href="{{ route('headline-slide.index') }}" :active="request()->routeIs('headline-slide.*')">
 
-                            Headline Slider
+                            Headline Sliders
 
                         </x-nav-link>
                     @endcan
 
-                    <x-nav-link href="{{ route('top-product.index') }}" :active="request()->routeIs('top-product.index')">
-                        {{ __('Top Sales') }}
-                    </x-nav-link>
+                    {{-- @canany(['view.product.sales', 'view.top.sales']) --}}
+                        <div class="flex items-center">
+                            <x-dropdown align="left" width="48" dropdownClasses="mt-0">
+
+                                <x-slot name="trigger">
+                                    <button class="inline-flex items-center px-3 py-2">
+                                        Sales Management
+                                    </button>
+                                </x-slot>
+
+                                <x-slot name="content">
+
+                                    @can('view.product.sales')
+                                        <x-dropdown-link href="{{ route('product-sales-stats.index') }}">
+                                            Sales Statistics
+                                        </x-dropdown-link>
+                                    @endcan
+
+                                    @can('view.top.sales')
+                                        <x-dropdown-link href="{{ route('top-product.index') }}">
+                                            Top Sales
+                                        </x-dropdown-link>
+                                    @endcan
+
+                                </x-slot>
+
+                            </x-dropdown>
+                        </div>
+                    {{-- @endcanany --}}
 
                 </div>
             </div>
@@ -221,7 +247,8 @@
                                         {{ Auth::user()->name }}
 
                                         <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
-                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                            stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                         </svg>

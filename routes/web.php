@@ -68,7 +68,12 @@ Route::middleware([
     Route::resource('product-specification-scores', ProductSpecificationScoreController::class);
     Route::resource('score-weights', ScoreWeightController::class);
     Route::resource('product-final-scores', ProductFinalScoreController::class);
-    Route::resource('top-product', ProductSalesStatController::class);
+    // Route::resource('top-product', ::class);
+
+    Route::resource(
+        'product-sales-stats',
+        ProductSalesStatController::class
+    );
 
     Route::put('/ratings/{rating}', [RatingController::class, 'update']);
     Route::delete('/ratings/{rating}', [RatingController::class, 'destroy']);

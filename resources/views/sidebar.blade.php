@@ -27,7 +27,7 @@
         </div>
 
         <!-- SEARCH -->
-   
+
         <div class="flex-1 overflow-y-auto">
 
             <!-- MAIN -->
@@ -40,160 +40,183 @@
 
             <nav class="px-3 space-y-1">
 
-                <a href="{{ route('dashboard') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
+                {{-- Dashboard --}}
+                @can('view.dashboard')
+                    <a href="{{ route('dashboard') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
 
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 12l2-2m0 0l7-7 7 7m-9 11V9m0 0H5m7 0h7" />
-                    </svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7m-9 11V9m0 0H5m7 0h7" />
+                        </svg>
 
-                    <span x-show="sidebarOpen">Dashboard</span>
+                        <span x-show="sidebarOpen">Dashboard</span>
 
-                </a>
+                    </a>
+                @endcan
 
-                <a href="{{ route('products.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
+                {{-- Product --}}
+                @can('view.product')
+                    <a href="{{ route('products.index') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
 
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M20 13V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6" />
-                    </svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20 13V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6" />
+                        </svg>
 
-                    <span x-show="sidebarOpen">Products</span>
+                        <span x-show="sidebarOpen">Products</span>
 
-                </a>
+                    </a>
+                @endcan
 
-                <a href="{{ route('category.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
+                {{-- Category --}}
+                @can('view.category')
+                    <a href="{{ route('category.index') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
 
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
 
-                    <span x-show="sidebarOpen">Category</span>
+                        <span x-show="sidebarOpen">Category</span>
 
-                </a>
+                    </a>
+                @endcan
 
             </nav>
 
-            <!-- USER MANAGEMENT -->
-            <div x-show="sidebarOpen"
-                class="px-4 mt-6 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            @canany(['view.user', 'view.role', 'view.permission'])
+                <!-- USER MANAGEMENT -->
+                <div x-show="sidebarOpen"
+                    class="px-4 mt-6 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
 
-                System
-
-            </div>
-
-            <div x-data="{ openMenu: false }" class="px-3">
-
-                <button @click="openMenu =! openMenu"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100">
-
-                    <span>User Management</span>
-
-                    <svg :class="openMenu ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-
-                    </svg>
-
-                </button>
-
-                <div x-show="openMenu" x-collapse class="mt-1 ml-4 space-y-1">
-
-                    <a href="{{ route('users.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
-                        Users
-                    </a>
-
-                    <a href="{{ route('roles.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
-                        Roles
-                    </a>
-
-                    <a href="{{ route('permissions.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
-                        Permissions
-                    </a>
+                    System
 
                 </div>
+                <div x-data="{ openMenu: false }" class="px-3">
 
-            </div>
+                    <button @click="openMenu =! openMenu"
+                        class="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100">
+
+                        <span>User Management</span>
+
+                        <svg :class="openMenu ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+
+                        </svg>
+
+                    </button>
+
+                    <div x-show="openMenu" x-collapse class="mt-1 ml-4 space-y-1">
+
+                        @can('view.user')
+                            <a href="{{ route('users.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
+                                Users
+                            </a>
+                        @endcan
+
+                        @can('view.role')
+                            <a href="{{ route('roles.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
+                                Roles
+                            </a>
+                        @endcan
+
+                        @can('view.permission')
+                            <a href="{{ route('permissions.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
+                                Permissions
+                            </a>
+                        @endcan
+
+                    </div>
+                </div>
+            @endcan
 
             <!-- SPECIFICATION -->
-            <div x-data="{ openSpec: false }" class="px-3 mt-2">
+            @canany(['view.specification.group', 'view.specification', 'view.product.specification',
+                'view.score.weight'])
+                <div x-data="{ openSpec: false }" class="px-3 mt-2">
 
-                <button @click="openSpec = !openSpec"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100">
+                    <button @click="openSpec=!openSpec"
+                        class="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-100">
 
-                    <span>Specification</span>
+                        <span>Specification</span>
 
-                    <svg :class="openSpec ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
+                    </button>
 
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    <div x-show="openSpec" x-collapse class="mt-1 ml-4 space-y-1">
 
-                    </svg>
+                        @can('view.specification.group')
+                            <a href="{{ route('specification-groups.index') }}"
+                                class="block px-4 py-2 rounded-lg hover:bg-slate-100">
+                                Specification Group
+                            </a>
+                        @endcan
 
-                </button>
+                        @can('view.specification')
+                            <a href="{{ route('specifications.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
+                                Specification
+                            </a>
+                        @endcan
 
-                <div x-show="openSpec" x-collapse class="mt-1 ml-4 space-y-1">
+                        @can('view.product.specification')
+                            <a href="{{ route('product-specifications.index') }}"
+                                class="block px-4 py-2 rounded-lg hover:bg-slate-100">
+                                Product Specifications
+                            </a>
+                        @endcan
 
-                    <a href="{{ route('specification-groups.index') }}"
-                        class="block px-4 py-2 rounded-lg hover:bg-slate-100">
-                        Specification Group
-                    </a>
+                        @can('view.score.weight')
+                            <a href="{{ route('score-weights.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
+                                Score Weights
+                            </a>
+                        @endcan
 
-                    <a href="{{ route('specifications.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
-                        Specification
-                    </a>
+                    </div>
 
-                    <a href="{{ route('product-specifications.index') }}"
-                        class="block px-4 py-2 rounded-lg hover:bg-slate-100">
-                        Product Specifications
-                    </a>
+                </div>
+            @endcanany
 
-                    <a href="{{ route('score-weights.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
-                        Score Weights
-                    </a>
+            <!-- CONTENT -->
+            @canany(['view.discount', 'view.headline', 'view.top.product', 'view.product.sales'])
+                <div x-show="sidebarOpen"
+                    class="px-4 mt-6 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+
+                    Content
 
                 </div>
 
-            </div>
+                <nav class="px-3 space-y-1">
 
-            <!-- CONTENT -->
-            <div x-show="sidebarOpen"
-                class="px-4 mt-6 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    @can('view.discount')
+                        <a href="{{ route('discount.index') }}" class="...">
+                            <span x-show="sidebarOpen">Discount</span>
+                        </a>
+                    @endcan
 
-                Content
+                    @can('view.headline')
+                        <a href="{{ route('headline-slide.index') }}" class="...">
+                            <span x-show="sidebarOpen">Headline Slider</span>
+                        </a>
+                    @endcan
 
-            </div>
+                    @can('view.top.product')
+                        <a href="{{ route('top-product.index') }}" class="...">
+                            <span x-show="sidebarOpen">Top Product</span>
+                        </a>
+                    @endcan
 
-            <nav class="px-3 space-y-1">
+                    @can('view.product.sales')
+                        <a href="{{ route('product-sales-stats.index') }}" class="...">
+                            <span x-show="sidebarOpen">Sales Statistics</span>
+                        </a>
+                    @endcan
 
-                <a href="{{ route('discount.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
-
-                    <span x-show="sidebarOpen">Discount</span>
-
-                </a>
-
-                <a href="{{ route('headline-slide.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
-
-                    <span x-show="sidebarOpen">Headline Slider</span>
-
-                </a>
-
-                <a href="{{ route('top-product.index') }}"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
-
-                    <span x-show="sidebarOpen">Top Product</span>
-
-                </a>
-
-            </nav>
-
+                </nav>
+            @endcan
         </div>
 
         <!-- PROFILE -->
