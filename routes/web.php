@@ -18,6 +18,7 @@ use App\Http\Controllers\ScoreWeightController;
 use App\Http\Controllers\SpecificationController;
 use App\Http\Controllers\SpecificationGroupController;
 use App\Http\Controllers\SpecificationScoreController;
+use App\Http\Controllers\TopSalesController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -68,12 +69,8 @@ Route::middleware([
     Route::resource('product-specification-scores', ProductSpecificationScoreController::class);
     Route::resource('score-weights', ScoreWeightController::class);
     Route::resource('product-final-scores', ProductFinalScoreController::class);
-    // Route::resource('top-product', ::class);
-
-    Route::resource(
-        'product-sales-stats',
-        ProductSalesStatController::class
-    );
+    Route::resource('top-product', TopSalesController::class);
+    Route::resource('product-sales-stats',ProductSalesStatController::class);
 
     Route::put('/ratings/{rating}', [RatingController::class, 'update']);
     Route::delete('/ratings/{rating}', [RatingController::class, 'destroy']);

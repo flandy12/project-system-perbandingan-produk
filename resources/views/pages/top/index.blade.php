@@ -65,17 +65,9 @@
 
                                 <td class="border px-4 py-3 flex items-center gap-3">
 
-                                    <img src="{{ asset('storage/'.$item->thumbnail) }}"
-                                         class="w-12 h-12 object-cover rounded"
-                                         alt="{{ e($item->name) }}"
-                                         loading="lazy">
-
                                     <div>
                                         <div class="font-semibold">
-                                            {{ e($item->name) }}
-                                        </div>
-                                        <div class="text-xs text-gray-500">
-                                            ID: {{ $item->id }}
+                                            {{ e($item->title) }}
                                         </div>
                                     </div>
 

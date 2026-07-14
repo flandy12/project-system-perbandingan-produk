@@ -2,50 +2,102 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 
 class PermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $permissions = [
-            // PRODUCT
-            'product.view',
-            'product.create',
-            'product.update',
-            'product.delete',
 
-            // USER
-            'user.view',
-            'user.create',
-            'user.update',
-            'user.delete',
+            // Dashboard
+            'view.dashboard',
 
-            // ROLE & PERMISSION
-            'role.view',
-            'role.create',
-            'role.update',
-            'role.delete',
+            // User
+            'view.user',
+            'create.user',
+            'edit.user',
+            'delete.user',
 
-            'permission.view',
-            'permission.create',
-            'permission.update',
-            'permission.delete',
+            // Role
+            'view.role',
+            'create.role',
+            'edit.role',
+            'delete.role',
 
-            'report.view',
-            'report.download',
+            // Permission
+            'view.permission',
+            'create.permission',
+            'edit.permission',
+            'delete.permission',
+
+            // Product
+            'view.product',
+            'create.product',
+            'edit.product',
+            'delete.product',
+
+            // Category
+            'view.category',
+            'create.category',
+            'edit.category',
+            'delete.category',
+
+            // Discount
+            'view.discount',
+            'create.discount',
+            'edit.discount',
+            'delete.discount',
+
+            // Headline
+            'view.headline',
+            'create.headline',
+            'edit.headline',
+            'delete.headline',
+
+            // Top Product
+            'view.top.product',
+
+            // Product Sales
+            'view.product.sales',
+            'create.product.sales',
+            'edit.product.sales',
+            'delete.product.sales',
+
+            // Specification Group
+            'view.specification.group',
+            'create.specification.group',
+            'edit.specification.group',
+            'delete.specification.group',
+
+            // Specification
+            'view.specification',
+            'create.specification',
+            'edit.specification',
+            'delete.specification',
+
+            // Product Specification
+            'view.product.specification',
+            'create.product.specification',
+            'edit.product.specification',
+            'delete.product.specification',
+
+            // Score Weight
+            'view.score.weight',
+            'create.score.weight',
+            'edit.score.weight',
+            'delete.score.weight',
+
         ];
 
         foreach ($permissions as $permission) {
+
             Permission::firstOrCreate([
                 'name' => $permission,
-                'guard_name' => 'web', // ganti 'sanctum' jika pakai sanctum
+                'guard_name' => 'web',
             ]);
+
         }
     }
 }

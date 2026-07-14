@@ -22,9 +22,9 @@ class TopSalesController extends Controller
 
         $sales = Product::select(
             'products.id',
-            'products.name',
+            'products.title',
+            'products.image',
             'products.price',
-            'products.thumbnail',
             'product_sales_stats.total_sold'
         )
             ->join('product_sales_stats', 'product_sales_stats.product_id', '=', 'products.id')

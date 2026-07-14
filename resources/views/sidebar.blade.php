@@ -192,25 +192,25 @@
                 <nav class="px-3 space-y-1">
 
                     @can('view.discount')
-                        <a href="{{ route('discount.index') }}" class="...">
+                        <a href="{{ route('discount.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
                             <span x-show="sidebarOpen">Discount</span>
                         </a>
                     @endcan
 
                     @can('view.headline')
-                        <a href="{{ route('headline-slide.index') }}" class="...">
+                        <a href="{{ route('headline-slide.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
                             <span x-show="sidebarOpen">Headline Slider</span>
                         </a>
                     @endcan
 
                     @can('view.top.product')
-                        <a href="{{ route('top-product.index') }}" class="...">
+                        <a href="{{ route('top-product.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
                             <span x-show="sidebarOpen">Top Product</span>
                         </a>
                     @endcan
 
                     @can('view.product.sales')
-                        <a href="{{ route('product-sales-stats.index') }}" class="...">
+                        <a href="{{ route('product-sales-stats.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
                             <span x-show="sidebarOpen">Sales Statistics</span>
                         </a>
                     @endcan

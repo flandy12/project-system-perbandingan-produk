@@ -21,7 +21,7 @@ class ProductSalesStatController extends Controller
             ->orderBy('title')
             ->get();
 
-        return view('product-sales-stats.index', compact(
+        return view('pages.product-sales-stats.index', compact(
             'stats',
             'products'
         ));
