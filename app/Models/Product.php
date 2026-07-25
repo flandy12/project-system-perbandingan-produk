@@ -76,5 +76,13 @@ class Product extends Model
         return $this->hasMany(Rating::class);
     }
 
-    
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function salesStat()
+    {
+        return $this->hasOne(ProductSalesStat::class, 'product_id');
+    }
 }

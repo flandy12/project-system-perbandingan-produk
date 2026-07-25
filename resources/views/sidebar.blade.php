@@ -85,6 +85,21 @@
                     </a>
                 @endcan
 
+                {{-- Comment --}}
+                @can('comment.view')
+                    <a href="{{ route('comments.index') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
+
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 10h8M8 14h5m-9 7l2.5-2.5A2 2 0 004 17.086V5a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H7.414a2 2 0 00-1.414.586L4 21z" />
+                        </svg>
+
+                        <span x-show="sidebarOpen">Comment</span>
+
+                    </a>
+                @endcan
+
             </nav>
 
             @canany(['view.user', 'view.role', 'view.permission'])
@@ -157,7 +172,8 @@
                         @endcan
 
                         @can('view.specification')
-                            <a href="{{ route('specifications.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
+                            <a href="{{ route('specifications.index') }}"
+                                class="block px-4 py-2 rounded-lg hover:bg-slate-100">
                                 Specification
                             </a>
                         @endcan
@@ -210,7 +226,8 @@
                     @endcan
 
                     @can('view.product.sales')
-                        <a href="{{ route('product-sales-stats.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100">
+                        <a href="{{ route('product-sales-stats.index') }}"
+                            class="block px-4 py-2 rounded-lg hover:bg-slate-100">
                             <span x-show="sidebarOpen">Sales Statistics</span>
                         </a>
                     @endcan

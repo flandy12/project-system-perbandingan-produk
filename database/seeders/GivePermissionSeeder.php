@@ -158,6 +158,27 @@ class GivePermissionSeeder extends Seeder
             'create.score.weight',
             'edit.score.weight',
             'delete.score.weight',
+
+            'view.discount',
+            'create.discount',
+            'edit.discount',
+            'delete.discount',
+
+            'view.user',
+            'view.role',
+            'view.permission',
+
+            'create.user',
+            'edit.user',
+            'delete.user',
+
+            'create.role',
+            'edit.role',
+            'delete.role',
+
+            'create.permission',
+            'edit.permission',
+            'delete.permission',
         ]);
 
         /*

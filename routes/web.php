@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\HeadlineSliderController;
 use App\Http\Controllers\HomeController;
@@ -70,8 +71,17 @@ Route::middleware([
     Route::resource('score-weights', ScoreWeightController::class);
     Route::resource('product-final-scores', ProductFinalScoreController::class);
     Route::resource('top-product', TopSalesController::class);
-    Route::resource('product-sales-stats',ProductSalesStatController::class);
+    Route::resource('product-sales-stats', ProductSalesStatController::class);
 
     Route::put('/ratings/{rating}', [RatingController::class, 'update']);
     Route::delete('/ratings/{rating}', [RatingController::class, 'destroy']);
+
+    Route::resource('comments', CommentController::class);
+
+    Route::post('/products/{product}/comments', [CommentController::class, 'store'])->name('products.comments.store');
+    Route::patch('/comments/{comment}/approve', [CommentController::class, 'approve'])
+        ->name('comments.approve');
+
+    Route::patch('/comments/{comment}/reject', [CommentController::class, 'reject'])
+        ->name('comments.reject');
 });

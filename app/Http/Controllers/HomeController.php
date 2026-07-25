@@ -70,80 +70,31 @@ class HomeController extends Controller
         ]);
 
         $products = Product::query()
-        ->when($request->price_min, function ($q) use ($request) {
-            $q->where('products.price', '>=', $request->price_min);
-        })
-        ->when($request->price_max, function ($q) use ($request) {
-            $q->where('products.price', '<=', $request->price_max);
-        })
-        ->when($request->year, function ($q) use ($request) {
-            $q->whereYear('products.created_at', $request->year);
-        })
-        ->when($request->sort, function ($q) use ($request) {
+            ->when($request->price_min, function ($q) use ($request) {
+                $q->where('products.price', '>=', $request->price_min);
+            })
+            ->when($request->price_max, function ($q) use ($request) {
+                $q->where('products.price', '<=', $request->price_max);
+            })
+            ->when($request->year, function ($q) use ($request) {
+                $q->whereYear('products.created_at', $request->year);
+            })
+            ->when($request->sort, function ($q) use ($request) {
 
-            switch ($request->sort) {
+                switch ($request->sort) {
 
-                case 'newest':
-                    $q->orderBy('products.created_at', 'desc');
-                    break;
+                    case 'newest':
+                        $q->orderBy('products.created_at', 'desc');
+                        break;
 
-                case 'oldest':
-                    $q->orderBy('products.created_at', 'asc');
-                    break;
-            }
-
-        }, function ($q) {
-            $q->latest('products.created_at');
-        })
-        ->paginate(12);
-
-        // $products = Product::query()->select(
-        //     'products.*',
-        //     DB::raw('COUNT(product_clicks.id) as total_clicks')
-        // )->leftJoin(
-        //     'product_clicks',
-        //     'products.id',
-        //     '=',
-        //     'product_clicks.product_id'
-        // )->when($request->price_min, function ($q) use ($request) {
-        //     $q->where('products.price', '>=', $request->price_min);
-        // })->when($request->price_max, function ($q) use ($request) {
-        //     $q->where('products.price', '<=', $request->price_max);
-        // }) // FILTER TANGGAL
-        //     ->when($request->year, function ($q) use ($request) {
-        //         $q->whereYear('products.created_at', $request->year);
-        //     })
-
-        //     // GROUP BY WAJIB
-        //     ->groupBy('products.id')
-
-        //     // SORTING
-        //     ->when($request->sort, function ($q) use ($request) {
-
-        //         switch ($request->sort) {
-
-        //             case 'newest':
-        //                 $q->orderBy('products.created_at', 'desc');
-        //                 break;
-
-        //             case 'oldest':
-        //                 $q->orderBy('products.created_at', 'asc');
-        //                 break;
-
-        //             case 'best':
-        //                 $q->orderByDesc('total_clicks');
-        //                 break;
-
-        //             case 'worst':
-        //                 $q->orderBy('total_clicks', 'asc');
-        //                 break;
-        //         }
-        //     }, function ($q) {
-
-        //         $q->latest('products.created_at');
-        //     })
-
-        //     ->paginate(12);
+                    case 'oldest':
+                        $q->orderBy('products.created_at', 'asc');
+                        break;
+                }
+            }, function ($q) {
+                $q->latest('products.created_at');
+            })
+            ->paginate(12);
 
         return view('pages.home.gallery', compact('products'));
     }
@@ -223,34 +174,63 @@ class HomeController extends Controller
 
         $product->load([
             'category',
-            'ratings.user'
+            'ratings.user',
+            'salesStat',
+            'comments.user',
         ]);
-        $totalRatings = $product->ratings()->count();
 
-        $averageRating = round(
-            $product->ratings()->avg('rating'),
-            1
-        );
+        // Statistik Produk
+        $averageRating = round($product->ratings->avg('rating') ?? 0, 1);
+        $totalRatings  = $product->ratings->count();
+        $totalSold     = $product->salesStat?->total_sold ?? 0;
+        $totalViews    = $product->clicks()->count();
 
+        // Komentar
+        $comments = $product->comments()
+            ->with('user')
+            ->latest()
+            ->paginate(10);
+
+        // Distribusi Rating
         $ratingPercent = [];
 
         for ($i = 1; $i <= 5; $i++) {
 
-            $count = $product->ratings()
+            $count = $product->ratings
                 ->where('rating', $i)
                 ->count();
 
-            $ratingPercent[$i] = $totalRatings
+            $ratingPercent[$i] = $totalRatings > 0
                 ? round(($count / $totalRatings) * 100)
                 : 0;
         }
-        return view('pages.home.show', [
-            'product' => $product,
-            'averageRating' => $averageRating,
-            'totalRatings' => $totalRatings,
-            'ratingPercent' => $ratingPercent,
-            'months' => $months,
-            'ratings' => $ratings
-        ]);
+
+        $reviews = $comments->map(function ($comment) use ($product) {
+
+            $rating = $product->ratings
+                ->where('user_id', $comment->user_id)
+                ->first();
+
+            return (object) [
+                'user' => $comment->user,
+                'comment' => $comment->comment,
+                'rating' => optional($rating)->rating ?? 0,
+                'created_at' => $comment->created_at,
+            ];
+        });
+
+
+        return view('pages.home.show', compact(
+            'product',
+            'comments',
+            'averageRating',
+            'totalRatings',
+            'totalSold',
+            'totalViews',
+            'ratingPercent',
+            'months',
+            'ratings',
+            'reviews'
+        ));
     }
 }

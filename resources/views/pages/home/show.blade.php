@@ -52,7 +52,7 @@
                                 <div class="bg-white rounded-2xl p-6 shadow-sm border">
                                     <p class="text-gray-500 text-sm">Rating</p>
                                     <h2 class="text-3xl font-bold mt-2">
-                                        {{ $averageRating }}
+                                        {{ number_format($averageRating, 1) }}
                                     </h2>
                                 </div>
 
@@ -66,14 +66,14 @@
                                 <div class="bg-white rounded-2xl p-6 shadow-sm border">
                                     <p class="text-gray-500 text-sm">Terjual</p>
                                     <h2 class="text-3xl font-bold mt-2">
-                                        {{ number_format($product->sold ?? 0) }}
+                                        {{ number_format($totalSold) }}
                                     </h2>
                                 </div>
 
                                 <div class="bg-white rounded-2xl p-6 shadow-sm border">
                                     <p class="text-gray-500 text-sm">Views</p>
                                     <h2 class="text-3xl font-bold mt-2">
-                                        {{ number_format($product->views ?? 0) }}
+                                        {{ number_format($totalViews) }}
                                     </h2>
                                 </div>
 
@@ -120,76 +120,130 @@
                     Review Terbaru
                 </h2>
 
-                @forelse($product->ratings as $review)
+                @foreach ($reviews as $review)
                     <div class="border-b py-4">
 
                         <div class="flex justify-between">
 
                             <div>
 
-                                <h4 class="font-semibold">
-                                    {{ $review->user->name ?? 'Anonymous' }}
-                                </h4>
+                                <strong>{{ $review->user->name }}</strong>
 
-                                <div class="text-yellow-500">
-                                    {{ str_repeat('⭐', $review->rating) }}
+                                <div class="flex mt-1">
+
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <svg class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"
+                                            fill="currentColor" viewBox="0 0 20 20">
+                                            <path
+                                                d="M9.049.927l2.26 4.577 5.05.734-3.655 3.562.863 5.03L9.05 12.347 4.533 14.83l.863-5.03L1.74 6.238l5.05-.734L9.05.927z" />
+                                        </svg>
+                                    @endfor
+
                                 </div>
 
                             </div>
 
-                            <div class="text-sm text-gray-500">
-                                {{ $review->created_at->diffForHumans() }}
-                            </div>
+                            <span>{{ $review->created_at->diffForHumans() }}</span>
 
                         </div>
 
-                        @if (!empty($review->review))
-                            <p class="mt-3 text-gray-600">
-                                {{ $review->review }}
-                            </p>
-                        @endif
-
-                    </div>
-
-                @empty
-
-                    <div class="text-center py-10">
-
-                        <div class="text-5xl mb-4">
-                            ⭐
-                        </div>
-
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            Belum Ada Review
-                        </h3>
-
-                        <p class="text-gray-500 mt-2 max-w-md mx-auto">
-                            Jadilah yang pertama memberikan ulasan untuk produk ini.
-                            Bagikan pengalaman Anda agar pengguna lain dapat membuat keputusan yang lebih baik.
+                        <p class="mt-2">
+                            {{ $review->comment }}
                         </p>
 
-                        @guest
-                            <div class="mt-6">
-                                <a href="{{ route('login') }}"
-                                    class="inline-flex items-center px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                    Login untuk Menulis Review
-                                </a>
+                    </div>
+                @endforeach
+
+                {{-- ===================== --}}
+                {{-- FORM --}}
+                {{-- ===================== --}}
+                @auth
+
+                    <form action="{{ route('products.comments.store', $product) }}" method="POST"
+                        class="mt-8 border-t pt-8" x-data="{
+                            comment: '',
+                            rating: {{ old('rating', 0) }},
+                            hover: 0
+                        }">
+
+                        @csrf
+
+                        <div class="mb-5">
+
+                            <label class="font-semibold block mb-2">
+                                Berikan Rating
+                            </label>
+
+                            <input type="hidden" name="rating" x-model="rating">
+
+                            <div class="flex gap-1">
+
+                                <template x-for="star in 5" :key="star">
+
+                                    <svg @mouseenter="hover = star" @mouseleave="hover = 0" @click="rating = star"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        class="w-9 h-9 cursor-pointer transition-all duration-150"
+                                        :class="star <= (hover || rating) ?
+                                            'text-yellow-400 fill-current scale-110' :
+                                            'text-gray-300 fill-current'">
+
+                                        <path
+                                            d="M12 .587l3.668 7.431L24 9.748l-6 5.847 1.417 8.268L12 19.771 4.583 23.863 6 15.595 0 9.748l8.332-1.73z" />
+
+                                    </svg>
+
+                                </template>
+
                             </div>
-                        @else
-                            <div class="mt-6">
-                                <button
-                                    onclick="document.getElementById('review-form').scrollIntoView({ behavior: 'smooth' })"
-                                    class="inline-flex items-center px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                    Tulis Review Pertama
-                                </button>
-                            </div>
-                        @endguest
+
+                            @error('rating')
+                                <p class="text-red-500 text-sm mt-2">
+                                    {{ $message }}
+                                </p>
+                            @enderror
+
+                        </div>
+
+                        <div class="mb-5">
+
+                            <textarea name="comment" x-model="comment" rows="4"
+                                class="w-full border rounded-xl p-4 focus:ring-2 focus:ring-blue-500" placeholder="Tulis komentar Anda..."></textarea>
+
+                            @error('comment')
+                                <p class="text-red-500 text-sm mt-2">
+                                    {{ $message }}
+                                </p>
+                            @enderror
+
+                        </div>
+
+                        <button type="submit" :disabled="rating === 0"
+                            class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl transition">
+
+                            Kirim Review
+
+                        </button>
+
+                    </form>
+                @else
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 mt-8">
+
+                        <p>
+                            Silakan login untuk memberikan review.
+                        </p>
+
+                        <a href="{{ route('login') }}"
+                            class="inline-block mt-4 bg-blue-600 text-white px-5 py-2 rounded-lg">
+
+                            Login
+
+                        </a>
 
                     </div>
-                @endforelse
+
+                @endauth
 
             </div>
-
         </div>
     </div>
 
