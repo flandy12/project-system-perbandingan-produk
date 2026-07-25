@@ -27,11 +27,36 @@
                         <h1 class="text-4xl font-bold text-gray-900">
                             {{ $product->title }}
                         </h1>
+                        @php
+                            $discount = $product->discounts->first();
+
+                            $discountPercent = $discount?->percentage ?? 0;
+
+                            $finalPrice =
+                                $discountPercent > 0
+                                    ? $product->price - ($product->price * $discountPercent) / 100
+                                    : $product->price;
+                        @endphp
 
                         <div class="mt-6">
-                            <h2 class="text-4xl font-bold text-green-600">
-                                Rp {{ number_format($product->price, 0, ',', '.') }}
-                            </h2>
+                            @if ($discountPercent > 0)
+                                <p class="text-xl text-gray-400 line-through">
+                                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                                </p>
+
+                                <h2 class="text-4xl font-bold text-green-600">
+                                    Rp {{ number_format($finalPrice, 0, ',', '.') }}
+                                </h2>
+
+                                <span
+                                    class="inline-flex items-center mt-2 px-3 py-1 rounded-full bg-red-100 text-red-600 text-sm font-semibold">
+                                    Hemat {{ $discountPercent }}%
+                                </span>
+                            @else
+                                <h2 class="text-4xl font-bold text-green-600">
+                                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                                </h2>
+                            @endif
                         </div>
 
                         <hr class="my-8">
