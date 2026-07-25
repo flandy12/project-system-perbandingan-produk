@@ -39,7 +39,7 @@
                                 @canany(['edit.product', 'delete.product'])
                                     <td class="border px-4 py-2 text-center space-x-2">
 
-                                        @can('edit.roduct')
+                                        @can('edit.product')
                                             <button onclick='openEdit(@json($product))' class="text-green-600">
                                                 Edit
                                             </button>
