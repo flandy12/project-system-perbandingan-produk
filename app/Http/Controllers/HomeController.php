@@ -26,10 +26,14 @@ class HomeController extends Controller
         /**
          * TOP PENJUALAN
          */
-        $topSales = Product::select('products.*')
+        $topSales = Product::select(
+            'products.*',
+            DB::raw('SUM(product_sales_stats.total_sold) as total_sales')
+        )
             ->join('product_sales_stats', 'product_sales_stats.product_id', '=', 'products.id')
             ->where('products.status', 'active')
-            ->orderByDesc('product_sales_stats.total_sold')
+            ->groupBy('products.id')
+            ->orderByDesc('total_sales')
             ->limit(8)
             ->get();
 
@@ -216,7 +220,7 @@ class HomeController extends Controller
                 'created_at' => $comment->created_at,
             ];
         });
-        
+
         return view('pages.home.show', compact(
             'product',
             'comments',
