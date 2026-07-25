@@ -41,35 +41,38 @@ class CommentController extends Controller
 
         return view('comments.create', compact('products', 'parents'));
     }
-
-    /**
-     * Store a newly created resource.
-     */
+    
     public function store(Request $request, Product $product)
     {
         $validated = $request->validate([
             'comment'   => 'required|string|max:2000',
-            'rating' => 'required|integer|between:1,5',
+            'rating'    => 'required|integer|between:1,5',
             'parent_id' => 'nullable|exists:comments,id',
         ]);
 
-        $product->comments()->create([
-            'user_id'   => Auth::id(),
-            'parent_id' => $validated['parent_id'] ?? null,
-            'comment'   => $validated['comment'],
-            'status'    => 'pending', // atau pending
-        ]);
+        DB::transaction(function () use ($validated, $product) {
 
-        $exists = Rating::where('product_id', $product->id)
-            ->where('user_id', Auth::id())
-            ->exists();
+            // Simpan komentar
+            $product->comments()->create([
+                'user_id'   => Auth::id(),
+                'parent_id' => $validated['parent_id'] ?? null,
+                'comment'   => $validated['comment'],
+                'status'    => 'pending',
+            ]);
 
-        if ($exists) {
-            return back()->with('error', 'Anda sudah memberikan rating untuk produk ini. Silakan edit rating Anda.');
-        }
+            // Simpan atau update rating
+            Rating::updateOrCreate(
+                [
+                    'product_id' => $product->id,
+                    'user_id'    => Auth::id(),
+                ],
+                [
+                    'rating' => $validated['rating'],
+                ]
+            );
+        });
 
-
-        return back()->with('success', 'Komentar berhasil dikirim.');
+        return back()->with('success', 'Komentar dan rating berhasil dikirim.');
     }
 
     /**

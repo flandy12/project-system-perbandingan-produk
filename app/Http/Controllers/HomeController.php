@@ -176,17 +176,17 @@ class HomeController extends Controller
             'category',
             'ratings.user',
             'salesStat',
-            'comments.user',
         ]);
 
         // Statistik Produk
         $averageRating = round($product->ratings->avg('rating') ?? 0, 1);
         $totalRatings  = $product->ratings->count();
-        $totalSold     = $product->salesStat?->total_sold ?? 0;
+        $totalSold = $product->salesStats()->sum('total_sold');
         $totalViews    = $product->clicks()->count();
 
-        // Komentar
+        // Hanya komentar yang sudah approve
         $comments = $product->comments()
+            ->where('status', 'approved')
             ->with('user')
             ->latest()
             ->paginate(10);
@@ -195,7 +195,6 @@ class HomeController extends Controller
         $ratingPercent = [];
 
         for ($i = 1; $i <= 5; $i++) {
-
             $count = $product->ratings
                 ->where('rating', $i)
                 ->count();
@@ -205,21 +204,19 @@ class HomeController extends Controller
                 : 0;
         }
 
-        $reviews = $comments->map(function ($comment) use ($product) {
+        // Mapping rating berdasarkan user
+        $ratingMap = $product->ratings->keyBy('user_id');
 
-            $rating = $product->ratings
-                ->where('user_id', $comment->user_id)
-                ->first();
-
+        $reviews = $comments->through(function ($comment) use ($ratingMap) {
             return (object) [
-                'user' => $comment->user,
-                'comment' => $comment->comment,
-                'rating' => optional($rating)->rating ?? 0,
+                'user'       => $comment->user,
+                'comment'    => $comment->comment,
+                'status'     => $comment->status,
+                'rating'     => optional($ratingMap->get($comment->user_id))->rating ?? 0,
                 'created_at' => $comment->created_at,
             ];
         });
-
-
+        
         return view('pages.home.show', compact(
             'product',
             'comments',

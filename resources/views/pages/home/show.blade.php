@@ -130,7 +130,6 @@
                                 <strong>{{ $review->user->name }}</strong>
 
                                 <div class="flex mt-1">
-
                                     @for ($i = 1; $i <= 5; $i++)
                                         <svg class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"
                                             fill="currentColor" viewBox="0 0 20 20">
@@ -138,7 +137,6 @@
                                                 d="M9.049.927l2.26 4.577 5.05.734-3.655 3.562.863 5.03L9.05 12.347 4.533 14.83l.863-5.03L1.74 6.238l5.05-.734L9.05.927z" />
                                         </svg>
                                     @endfor
-
                                 </div>
 
                             </div>
