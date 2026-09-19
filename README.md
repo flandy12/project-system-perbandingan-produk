@@ -8,6 +8,7 @@ Sistem Perbandingan Produk adalah aplikasi web untuk menampilkan katalog, memban
 - [Navbar Website Publik](#navbar-website-publik)
 - [Dashboard dan Sidebar Admin](#dashboard-dan-sidebar-admin)
 - [Panduan dan Format Input Data](#panduan-dan-format-input-data)
+- [Cara Compare Menampilkan Grafik Diagram](#cara-compare-menampilkan-grafik-diagram)
 - [Urutan Pengisian Data](#urutan-pengisian-data)
 - [Hak Akses](#hak-akses)
 - [Teknologi](#teknologi)
@@ -233,6 +234,208 @@ Password disimpan sebagai hash, bukan teks biasa.
 ### 13. Komentar dan Rating
 
 Pengguna memasukkan komentar maksimal 2.000 karakter dan rating berupa bilangan bulat 1–5. Komentar baru berstatus `pending` sampai pengelola mengubahnya menjadi `approved` atau `rejected`. Satu pengguna dapat memperbarui ratingnya untuk produk yang sama.
+
+## Cara Compare Menampilkan Grafik Diagram
+
+Halaman Compare menggunakan **radar chart** dari Chart.js. Diagram memperlihatkan perbandingan dua produk pada empat sumbu:
+
+1. **Kualitas**
+2. **Daya**
+3. **Fitur**
+4. **Konektivitas**
+
+Setiap sumbu memiliki nilai 0–100. Semakin jauh area grafik dari titik tengah, semakin tinggi skor produk pada kategori tersebut.
+
+### Alur dari pemilihan produk sampai grafik
+
+```mermaid
+flowchart LR
+    A[Pengguna memilih produk pertama] --> B[ID disimpan di localStorage]
+    B --> C[Pengguna memilih produk kedua]
+    C --> D[/compare?ids=ID_A,ID_B]
+    D --> E[HomeController memvalidasi dan mengambil kedua produk]
+    E --> F[CompareService menormalisasi spesifikasi]
+    F --> G[Blade mengirim metricsA dan metricsB ke Chart.js]
+    G --> H[Radar chart 0–100 ditampilkan]
+```
+
+Proses detailnya adalah sebagai berikut:
+
+1. Tombol **Bandingkan** menyimpan ID produk di browser melalui `localStorage` dengan key `compare_items`.
+2. Pengguna hanya dapat memilih maksimal dua produk.
+3. Setelah produk kedua dipilih, browser diarahkan ke URL seperti:
+
+   ```text
+   /compare?ids=12,25
+   ```
+
+4. Controller membersihkan ID nonnumerik, menghapus ID duplikat, dan hanya mengambil dua ID pertama.
+5. Compare hanya dilanjutkan jika tepat dua produk ditemukan. Jika tidak, halaman menampilkan pesan kesalahan.
+6. `CompareService` mencari spesifikasi yang sama-sama dimiliki kedua produk.
+7. Setiap nilai dinormalisasi, dikelompokkan ke salah satu dari empat kategori, lalu dirata-ratakan menjadi skor 0–100.
+8. Controller mengirim `metricsA`, `metricsB`, `percentA`, `percentB`, dan `reasons` ke Blade.
+9. Chart.js menggambar dua dataset pada elemen `<canvas id="radarChart">`.
+
+### Struktur data yang dibutuhkan mesin Compare
+
+Mesin Compare di `CompareService` dirancang membaca struktur berikut:
+
+| Tabel/data | Kolom penting | Fungsi |
+|---|---|---|
+| `spec_categories` | `name` | Menentukan sumbu grafik. Nama harus cocok dengan `kualitas`, `daya`, `fitur`, atau `konektivitas`. |
+| `spec_keys` | `name`, `category_id`, `unit`, `is_higher_better` | Mendefinisikan atribut numerik seperti RAM, berat, baterai, atau versi Bluetooth. |
+| `product_specs` | `product_id`, `spec_key_id`, `value` | Menyimpan nilai numerik atribut untuk setiap produk. |
+| `products` | `id`, `title`, `image`, `price` | Menyediakan identitas dan informasi ringkas produk yang dibandingkan. |
+
+Satu pasangan `product_id` dan `spec_key_id` hanya boleh tersimpan satu kali. Kolom `value` pada `product_specs` berupa desimal, sehingga nilai grafik harus dapat diubah menjadi angka.
+
+Contoh data kategori:
+
+| ID | Nama |
+|---:|---|
+| 1 | `kualitas` |
+| 2 | `daya` |
+| 3 | `fitur` |
+| 4 | `konektivitas` |
+
+Contoh definisi key:
+
+| Nama key | Kategori | Satuan | Higher is better? |
+|---|---|---|---:|
+| Resolusi kamera | `kualitas` | `MP` | Ya |
+| Kapasitas baterai | `daya` | `mAh` | Ya |
+| Jumlah fitur | `fitur` | fitur | Ya |
+| Versi Bluetooth | `konektivitas` | versi | Ya |
+| Berat | `kualitas` | `gram` | Tidak |
+
+`is_higher_better = true` berarti angka lebih besar dianggap lebih baik. Gunakan `false` untuk atribut seperti berat, konsumsi daya, atau waktu respons, yaitu saat angka lebih kecil lebih baik.
+
+Contoh nilai dua produk:
+
+| Produk | Key | Value |
+|---|---|---:|
+| Produk A | Kapasitas baterai | 4000 |
+| Produk B | Kapasitas baterai | 5000 |
+| Produk A | Berat | 180 |
+| Produk B | Berat | 200 |
+
+### Rumus normalisasi
+
+Untuk setiap spesifikasi yang dimiliki kedua produk, sistem memakai rumus:
+
+```text
+nilai_normal = (nilai_produk - nilai_minimum) / (nilai_maksimum - nilai_minimum)
+```
+
+Hasilnya berada pada rentang 0–1. Jika `is_higher_better` bernilai `false`, skor dibalik:
+
+```text
+nilai_normal = 1 - nilai_normal
+```
+
+Setelah itu seluruh skor dalam kategori yang sama dirata-ratakan dan dikali 100:
+
+```text
+skor_kategori = rata_rata(nilai_normal_spesifikasi) × 100
+```
+
+Contoh baterai 4.000 mAh dibandingkan 5.000 mAh, dengan nilai lebih besar lebih baik:
+
+```text
+Produk A = (4000 - 4000) / (5000 - 4000) = 0   → 0 poin
+Produk B = (5000 - 4000) / (5000 - 4000) = 1   → 100 poin
+```
+
+Contoh berat 180 gram dibandingkan 200 gram, dengan nilai lebih kecil lebih baik:
+
+```text
+Sebelum dibalik: Produk A = 0 dan Produk B = 1
+Setelah dibalik: Produk A = 1 dan Produk B = 0
+Hasil kategori: Produk A = 100 dan Produk B = 0
+```
+
+Jika kedua nilai sama, fungsi saat ini menghasilkan 0 untuk keduanya karena selisih maksimum dan minimum adalah nol.
+
+### Perhitungan poin keseluruhan
+
+Skor semua kategori dijumlahkan:
+
+```text
+scoreA = kualitasA + dayaA + fiturA + konektivitasA
+scoreB = kualitasB + dayaB + fiturB + konektivitasB
+```
+
+Kemudian diubah menjadi persentase relatif:
+
+```text
+percentA = scoreA / (scoreA + scoreB) × 100
+percentB = scoreB / (scoreA + scoreB) × 100
+```
+
+Nilai tersebut ditampilkan sebagai **Poin** dan progress bar. Jika seluruh skor nol, pembagi diamankan minimal menjadi 1 sehingga kedua poin menjadi 0.
+
+### Data yang benar agar grafik muncul
+
+- Harus ada tepat dua produk dengan ID berbeda.
+- Kedua produk harus mempunyai `spec_key_id` yang sama agar atribut dapat dibandingkan.
+- Nilai spesifikasi harus numerik, bukan teks seperti `16 GB`; simpan `16` dan letakkan `GB` pada kolom unit.
+- Nama kategori harus sama persis secara logis dengan empat kategori grafik. Service mengubah nama menjadi huruf kecil, tetapi hindari spasi tambahan.
+- Key harus mempunyai relasi ke kategori.
+- Nilai `is_higher_better` harus benar agar arah penilaian tidak terbalik.
+- Jika salah satu produk tidak memiliki sebuah key, key tersebut dilewati.
+- Jika tidak ada key yang sama dalam suatu kategori, skor kategori pada grafik menjadi 0.
+
+### Contoh data yang siap dibandingkan
+
+```text
+spec_categories
+- kualitas
+- daya
+- fitur
+- konektivitas
+
+spec_keys
+- RAM             → kategori: kualitas, unit: GB, higher: true
+- Baterai         → kategori: daya, unit: mAh, higher: true
+- Berat           → kategori: kualitas, unit: gram, higher: false
+- Bluetooth       → kategori: konektivitas, unit: versi, higher: true
+
+product_specs Produk A
+- RAM: 8
+- Baterai: 4000
+- Berat: 180
+- Bluetooth: 5.2
+
+product_specs Produk B
+- RAM: 12
+- Baterai: 5000
+- Berat: 200
+- Bluetooth: 5.3
+```
+
+### Alasan “produk lebih baik”
+
+Selain grafik, service membuat daftar alasan dengan membandingkan setiap key yang sama. Implementasi saat ini hanya memasukkan alasan ketika **Produk B** menang, sesuai judul tampilan “Mengapa Produk B lebih baik?”. Contoh:
+
+```text
+Ram lebih baik (12GB vs 8GB)
+Baterai lebih baik (5000mAh vs 4000mAh)
+```
+
+Jika Produk B tidak menang pada key mana pun, sistem menampilkan pesan bahwa perbedaan tidak signifikan berdasarkan spesifikasi utama.
+
+### Pemecahan masalah grafik
+
+| Masalah | Kemungkinan penyebab | Solusi |
+|---|---|---|
+| Semua sumbu bernilai 0 | Produk tidak mempunyai key yang sama atau nama kategori tidak cocok | Pastikan kedua produk memakai `spec_key_id` yang sama dan kategori termasuk empat nama yang didukung. |
+| Hanya beberapa sumbu muncul | Tidak ada data bersama pada kategori lainnya | Lengkapi nilai spesifikasi kedua produk. |
+| Produk lebih ringan mendapat skor buruk | `is_higher_better` salah | Set menjadi `false` untuk berat. |
+| Pesan “Pilih tepat 2 produk” | Parameter `ids` kosong, duplikat, atau bukan dua angka | Pilih dua produk berbeda atau gunakan `/compare?ids=1,2`. |
+| Pesan “Produk tidak ditemukan” | Salah satu ID tidak ada di tabel produk | Gunakan ID produk yang masih tersedia. |
+| Area grafik tidak tampil | Chart.js gagal dimuat dari CDN | Pastikan koneksi internet tersedia atau pasang Chart.js secara lokal. |
+
+> **Penting:** dashboard sekarang mengelola tabel `product_specifications` dengan model spesifikasi lama, sedangkan `CompareService` mengharapkan `product_specs`, `spec_keys`, dan relasi `key`. Model/relasi dan form input untuk skema Compare belum tersambung secara lengkap. Sebelum diagram dapat diandalkan, satukan skema tersebut atau tambahkan model `ProductSpec`, relasi `Product::specs()` ke `product_specs`, relasi `ProductSpec::key()`, serta form pengelolaannya.
 
 ## Urutan Pengisian Data
 
