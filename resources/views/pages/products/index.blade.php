@@ -1,5 +1,7 @@
 <x-app-layout>
     <div class="py-6">
+        @if(session('success'))<div role="status" class="max-w-7xl mx-auto mb-4 rounded-xl bg-green-50 border border-green-200 text-green-800 px-5 py-3">{{ session('success') }}</div>@endif
+        @if($errors->any())<div role="alert" class="max-w-7xl mx-auto mb-4 rounded-xl bg-red-50 border border-red-200 text-red-800 px-5 py-3">Perubahan belum tersimpan. Periksa kolom yang ditandai pada formulir.</div>@endif
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 rounded shadow">
@@ -33,7 +35,7 @@
                                 <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $product->title }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $product->category->name }}</td>
-                                <td class="border px-4 py-2 text-center">Rp {{ number_format($product->price) }}</td>
+                                <td class="border px-4 py-2 text-center">{{ $product->formatted_price }}</td>
                                 <td class="border px-4 py-2 text-center">{{ $product->stock }}</td>
                                 <td class="border px-4 py-2 text-center capitalize">{{ $product->status ?? '' }}</td>
                                 @canany(['edit.product', 'delete.product'])
@@ -71,18 +73,19 @@
         </div>
 
         <!-- MODAL -->
-        @canany(['create.product', 'edit.roduct'])
+        @canany(['create.product', 'edit.product'])
         <div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
             <div class="bg-white w-full max-w-xl p-6 rounded">
 
-                <h3 id="modalTitle" class="text-lg font-semibold mb-4">Tambah Produk</h3>
+                <h3 id="modalTitle" class="text-lg font-semibold mb-4">{{ old('_editing_product_id') ? 'Edit Produk' : 'Tambah Produk' }}</h3>
 
-                <form id="productForm" action="{{ route('products.store') }}" method="POST"
+                <form id="productForm" action="{{ old('_editing_product_id') ? route('products.update', old('_editing_product_id')) : route('products.store') }}" method="POST"
                     enctype="multipart/form-data">
 
                     @csrf
 
-                    <input type="hidden" name="_method" id="method">
+                    <input type="hidden" name="_method" id="method" value="{{ old('_editing_product_id') ? 'PUT' : 'POST' }}">
+                    <input type="hidden" name="_editing_product_id" id="editing_product_id" value="{{ old('_editing_product_id') }}">
 
                     <div class="max-h-[75vh] overflow-y-auto px-1 space-y-6">
 
@@ -140,9 +143,7 @@
                         </div>
 
                         {{-- GAMBAR --}}
-                        <div x-data="{
-                            preview: '{{ isset($product) && $product->image ? asset('storage/' . $product->image) : '' }}'
-                        }" class="bg-gray-50 border rounded-xl p-5">
+                        <div x-data="{ preview: '' }" @product-image.window="preview = $event.detail" class="bg-gray-50 border rounded-xl p-5">
 
                             <h3 class="font-semibold text-lg text-gray-800 mb-4">
                                 Gambar Produk
@@ -269,6 +270,19 @@
                         </div>
 
                         {{-- TAHUN & STATUS --}}
+                        <div class="bg-gray-50 border rounded-xl p-5 space-y-4">
+                            <label for="comparison_type" class="block font-semibold">Jenis perangkat untuk analisis</label>
+                            <select id="comparison_type" name="comparison_type" class="w-full rounded-lg border-gray-300"><option value="">Belum ditentukan</option>@foreach(config('stb_analysis.types') as $key=>$label)<option value="{{ $key }}" @selected(old('comparison_type')===$key)>{{ $label }}</option>@endforeach</select>
+                            <label for="description" class="block font-semibold">Deskripsi produk</label>
+                            <textarea id="description" name="description" rows="5" maxlength="20000" class="w-full rounded-lg border-gray-300">{{ old('description') }}</textarea>
+                            <p class="text-xs text-gray-500">Format paragraf, daftar, dan teks tebal diperbolehkan. Konten aktif dibersihkan otomatis. Sesuaikan deskripsi bila spesifikasi berubah.</p>
+                        </div>
+                        <div class="bg-sky-50 border border-sky-100 rounded-xl p-5">
+                            <label for="official_url" class="block font-semibold text-gray-800">Tautan website resmi produk</label>
+                            <input type="url" id="official_url" name="official_url" value="{{ old('official_url') }}" placeholder="https://website-resmi.com/produk" maxlength="2048" class="mt-3 w-full rounded-lg border-gray-300">
+                            <p class="text-sm text-gray-600 mt-2">Isi halaman resmi produk atau toko resmi yang sesuai. Tombol pelanggan muncul setelah tautan disimpan. Kosongkan untuk menyembunyikan tombol.</p>
+                            @error('official_url')<p class="text-red-600 text-sm mt-2">{{ $message }}</p>@enderror
+                        </div>
                         <div class="bg-gray-50 border rounded-xl p-5">
 
                             <h3 class="font-semibold text-lg text-gray-800 mb-4">
@@ -346,10 +360,21 @@
                                                     {{ $spec->name }}
                                                 </label>
 
-                                                <input type="text" name="specifications[{{ $spec->id }}]"
+                                                <input type="text" id="spec_{{ $spec->id }}" name="specifications[{{ $spec->id }}]"
                                                     value="{{ old('specifications.' . $spec->id) }}"
                                                     placeholder="Masukkan {{ $spec->name }}"
                                                     class="w-full rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500">
+                                                <p class="text-xs text-gray-500 mt-1">{{ $spec->data_type === 'boolean' ? '1 = didukung; 0 = tidak didukung; kosong = belum diketahui' : ($spec->unit ? 'Satuan: '.$spec->unit : 'Nilai sesuai sumber') }}</p>
+                                                @error('specifications.'.$spec->id)<p class="text-red-600 text-xs">{{ $message }}</p>@enderror
+                                                <details class="mt-2 text-xs"><summary class="cursor-pointer text-sky-700">Bukti & verifikasi</summary>
+                                                    <label for="proof_url_{{ $spec->id }}" class="block mt-2">URL sumber spesifikasi</label>
+                                                    <input type="url" id="proof_url_{{ $spec->id }}" name="proofs[{{ $spec->id }}][url]" value="{{ old('proofs.'.$spec->id.'.url') }}" class="w-full rounded-lg border-gray-300 mt-1 text-xs">
+                                                    <label for="proof_type_{{ $spec->id }}" class="block mt-2">Jenis sumber</label>
+                                                    <select id="proof_type_{{ $spec->id }}" name="proofs[{{ $spec->id }}][type]" class="w-full rounded-lg border-gray-300 text-xs"><option value="official">Produsen resmi</option><option value="retailer">Penjual</option><option value="marketplace">Marketplace</option></select>
+                                                    <label class="flex gap-2 mt-2"><input type="checkbox" name="proofs[{{ $spec->id }}][confirmed]" value="1">Saya sudah mencocokkan nilai dengan sumber ini.</label>
+                                                    <p class="text-gray-500 mt-1">Perubahan nilai menahan indeks sampai diverifikasi ulang. Bukti lama dipertahankan bila tidak dikonfirmasi.</p>
+                                                    @error('proofs.'.$spec->id.'.url')<p class="text-red-600">{{ $message }}</p>@enderror
+                                                </details>
                                             </div>
                                         @endforeach
 
@@ -393,25 +418,40 @@
                 document.getElementById('modal').classList.remove('hidden')
                 document.getElementById('modalTitle').innerText = 'Tambah Produk'
                 document.getElementById('productForm').action = "{{ route('products.store') }}"
-                document.getElementById('method').value = ''
                 document.getElementById('productForm').reset()
+                document.getElementById('method').value = 'POST'
+                document.getElementById('editing_product_id').value = ''
+                window.dispatchEvent(new CustomEvent('product-image', { detail: '' }))
             }
 
             function openEdit(product) {
                 document.getElementById('modal').classList.remove('hidden')
                 document.getElementById('modalTitle').innerText = 'Edit Produk'
                 document.getElementById('productForm').action = `/products/${product.id}`
+                document.getElementById('productForm').reset()
                 document.getElementById('method').value = 'PUT'
+                document.getElementById('editing_product_id').value = product.id
+                window.dispatchEvent(new CustomEvent('product-image', { detail: product.image ? @js(asset('storage')) + '/' + product.image : '' }))
+                document.getElementById('official_url').value = product.official_url || ''
+                document.getElementById('production_year').value = product.production_year || ''
+                document.getElementById('status').value = product.status
+                document.getElementById('comparison_type').value = product.comparison_type || ''
+                document.getElementById('description').value = product.description || ''
 
-                title.value = product.title
-                price.value = product.price
-                stock.value = product.stock
-                category_id.value = product.category_id
+                document.getElementById('title').value = product.title
+                document.getElementById('price').value = product.price ?? ''
+                document.getElementById('stock').value = product.stock
+                document.getElementById('category_id').value = product.category_id
 
                 if (product.specifications) {
                     product.specifications.forEach(spec => {
                         const el = document.getElementById('spec_' + spec.specification_id)
                         if (el) el.value = spec.value
+                        const proof = product.reference_metadata?.specifications?.[spec.specification_id]?.sources?.find(source => source.url)
+                        const proofUrl = document.getElementById('proof_url_' + spec.specification_id)
+                        const proofType = document.getElementById('proof_type_' + spec.specification_id)
+                        if (proofUrl) proofUrl.value = proof?.url || ''
+                        if (proofType) proofType.value = ['official','retailer','marketplace'].includes(proof?.type) ? proof.type : 'retailer'
                     })
                 }
             }

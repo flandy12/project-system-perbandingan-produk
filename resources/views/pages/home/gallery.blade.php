@@ -1,29 +1,27 @@
 <x-frontend-layout>
+    <div x-data="compare" x-init="init()">
     <div class="relative max-w-7xl mx-auto px-4 mb-12">
         <div id="top-penjualan" class="mb-16    ">
             <div class="flex justify-between mb-6">
                 <h2 class="text-lg font-semibold mb-4">Product</h2>
                 <div class="flex flex-wrap gap-3 mb-6" x-data="{ open: false }">
                     <form method="GET" action="{{ url()->current() }}" onsubmit="return cleanQuery(this)">
-                        <!-- Sort -->
-                        <select name="sort" class="border rounded px-3 py-2 text-sm w-32">
-                            <option value="">Urutkan</option>
-                            <option value="newest">Terbaru</option>
-                            <option value="oldest">Terlama</option>
-                            <option value="best">Terbaik</option>
-                            <option value="worst">Terburuk</option>
+                        <select name="sort" aria-label="Urutan produk" class="border rounded px-3 py-2 text-sm w-48">
+                            @foreach(['' => 'Urutkan', 'newest' => 'Produksi terbaru', 'oldest' => 'Produksi tertua', 'best' => 'Rating tertinggi', 'worst' => 'Rating terendah'] as $value => $label)
+                                <option value="{{ $value }}" @selected(request('sort', '') === $value)>{{ $label }}</option>
+                            @endforeach
                         </select>
-
-                        <!-- Harga -->
-                        <input type="number" name="price_min" placeholder="Harga Min"
-                            class="border rounded px-3 py-2 text-sm w-32">
-
-                        <input type="number" name="price_max" placeholder="Harga Max"
-                            class="border rounded px-3 py-2 text-sm w-32">
-
-                        <!-- Tahun Saja -->
-                        <input type="number" name="year" min="1900" max="2100" placeholder="2026"
-                            class="border rounded px-3 py-2 text-sm">
+                        <input type="number" name="price_min" min="0" placeholder="Harga Min" aria-label="Harga minimum"
+                            value="{{ request('price_min') }}" class="border rounded px-3 py-2 text-sm w-32">
+                        <input type="number" name="price_max" min="0" placeholder="Harga Max" aria-label="Harga maksimum"
+                            value="{{ request('price_max') }}" class="border rounded px-3 py-2 text-sm w-32">
+                        <select name="year" aria-label="Tahun produksi" class="border rounded px-3 py-2 text-sm w-48">
+                            <option value="">Semua tahun produksi</option>
+                            @foreach($productionYears as $year)
+                                <option value="{{ $year }}" @selected((string) request('year') === (string) $year)>{{ $year }}</option>
+                            @endforeach
+                            <option value="unknown" @selected(request('year') === 'unknown')>Tahun belum diisi</option>
+                        </select>
 
                         <button type="submit" class="bg-[#111727] text-white px-4 py-2 rounded">
                             Filter
@@ -33,48 +31,26 @@
                 </div>
             </div>
 
-            @if (!empty($products))
+            <p class="text-xs text-gray-500 mb-4">Urutan rating memakai ulasan pengguna aplikasi; produk tanpa ulasan berada di belakang. Tahun produksi memakai data pada formulir produk, bukan tanggal penambahan katalog.</p>
+            @if($errors->any())
+                <p class="text-sm text-red-600 mb-4">{{ $errors->first() }}</p>
+            @endif
+            @if ($products->count())
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 cursor-pointer">
                     @foreach ($products as $product)
                         @include('components.product-card', ['product' => $product])
                     @endforeach
                 </div>
             @else
-                <p class="text-gray-500 italic">Belum ada data penjualan.</p>
+                <p class="text-gray-500 italic">Tidak ada produk yang cocok dengan filter.</p>
             @endif
         </div>
     </div>
 
 
-    {{-- MODAL --}}
-    <div x-show="modalOpen" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-        <div @click="modalOpen=false" class="absolute inset-0 bg-black/40"></div>
-
-        <div class="relative bg-white rounded-2xl w-full max-w-lg p-6">
-            <div class="flex justify-between mb-4">
-                <h3 class="font-semibold">STB Merah</h3>
-                <button @click="modalOpen=false">✕</button>
-            </div>
-
-            <div class="h-40 bg-sky-200 rounded mb-4"></div>
-
-            <p class="text-xl font-bold mb-3">Rp.355.000</p>
-
-            <ul class="text-sm space-y-1 mb-4">
-                <li>Chipset : SUNPLUS 1509C</li>
-                <li>Memory : 512 Mb</li>
-                <li>Flash : 8 Mb</li>
-                <li>Video : 1080p</li>
-            </ul>
-
-            <button class="w-full py-2 border rounded hover:bg-gray-50">
-                Bandingkan
-            </button>
-        </div>
+    <div class="max-w-7xl mx-auto px-4 mb-6">{{ $products->withQueryString()->links() }}</div>
+    @include('components.compare-modal')
     </div>
-
-    </div>
-
 
     @push('js')
         <script>

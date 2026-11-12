@@ -75,6 +75,7 @@
         {{-- TOP SALES --}}
         <div id="top-penjualan" class="mb-16">
             <h2 class="text-lg font-semibold mb-4">Top Penjualan</h2>
+            <p class="text-sm text-gray-500 mb-4">{{ $salesPeriod ? 'Laporan terverifikasi periode '.sprintf('%02d/%d', $salesPeriod->month, $salesPeriod->year) : 'Belum ada laporan penjualan nyata terverifikasi.' }}</p>
 
             @if ($topSales->count())
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -90,7 +91,8 @@
 
         {{-- REKOMENDASI --}}
         <div id="rekomendasi" class="mb-16">
-            <h2 class="text-lg font-semibold mb-4">Rekomendasi</h2>
+            <h2 class="text-lg font-semibold mb-2">Rekomendasi</h2>
+            <p class="text-sm text-gray-500 mb-5">{{ $recommendationDescription }} <a href="{{ route('stb-recommendations.index') }}" class="text-blue-700 underline">Lihat dasar rekomendasi</a></p>
 
             @if ($recommendedProducts->count())
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -114,67 +116,9 @@
                 @endforeach
             </div>
         </div>
+        <div class="mt-6">{{ $products->withQueryString()->links() }}</div>
 
-
-        <div x-show="modalOpen" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-
-            <!-- overlay -->
-            <div @click="modalOpen=false" class="absolute inset-0 bg-black/40"></div>
-
-            <!-- modal -->
-            <div class="relative bg-white rounded-2xl w-full max-w-lg p-6">
-
-                <!-- header -->
-                <div class="flex justify-between mb-4">
-                    <h3 class="font-semibold text-lg" x-text="selectedProduct ? selectedProduct.title : ''">
-                    </h3>
-
-                    <button @click="modalOpen=false">✕</button>
-                </div>
-
-                <!-- image -->
-                <div class="h-56 rounded mb-4 overflow-hidden bg-gray-100">
-                    <img :src="selectedProduct && selectedProduct.image ?
-                        '/storage/' + selectedProduct.image :
-                        '/no-image.png'"
-                        class="w-full h-full object-cover">
-                </div>
-
-                <!-- price -->
-                <p class="text-xl font-bold mb-3 text-sky-600" x-text="formatPrice(selectedProduct?.price)">
-                </p>
-
-                <!-- description -->
-                <p class="text-sm text-gray-600 mb-4" x-text="selectedProduct ? selectedProduct.description : ''">
-                </p>
-
-                <!-- actions -->
-                <div class="flex gap-3">
-
-                    <!-- detail -->
-                    <a :href="selectedProduct ? '/item/' + selectedProduct.id : '#'"
-                        class="flex-1 text-center py-2 bg-sky-600 text-white rounded hover:bg-sky-700">
-                        Lihat Detail
-                    </a>
-
-                    <!-- compare -->
-                    <button @click="selectedProduct && toggle(String(selectedProduct.id))"
-                        :class="isSelected(selectedProduct?.id) ?
-                            'bg-green-500 text-white border-green-500' :
-                            'border'"
-                        class="flex-1 py-2 rounded hover:bg-gray-50 transition">
-
-                        <span
-                            x-text="isSelected(selectedProduct?.id) 
-                    ? '✓ Dipilih' 
-                    : 'Bandingkan'">
-                        </span>
-
-                    </button>
-
-                </div>
-            </div>
-        </div>
+        @include('components.compare-modal')
 
     </div>
 

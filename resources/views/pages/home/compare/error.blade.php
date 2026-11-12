@@ -41,7 +41,7 @@
                         </h2>
 
                         <p class="text-sky-600 font-bold text-lg mb-4">
-                            Rp {{ number_format($product->price,0,',','.') }}
+                            {{ $product->formatted_price }}
                         </p>
 
                         <p class="text-gray-600">
@@ -58,4 +58,4 @@
 
     </div>
 
-</x-app-layout>
+</x-frontend-layout>

@@ -1,7 +1,7 @@
-<div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden cursor-pointer h-full"
+<div class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden cursor-pointer"
     @click="
         trackClick({{ $product->id }});
-        setProduct(@js($product));
+        setProduct(@js(['id' => $product->id, 'title' => $product->title, 'image' => $product->image, 'price' => $product->selling_price, 'originalPrice' => $product->price, 'discount' => $product->active_discount_percentage, 'description' => $product->catalogue_summary, 'highlights' => $product->catalogue_highlights, 'priceLabel' => ($product->active_discount_percentage ? 'Sumber harga dasar: ' : '') . $product->price_label]));
      ">
 
 
@@ -12,37 +12,24 @@
     </div>
 
     <div class="p-4">
+        @if($product->recommendation_reason)
+            <p class="text-center text-xs text-sky-700 bg-sky-50 rounded-lg px-2 py-2 mb-3">{{ $product->recommendation_reason }}</p>
+        @endif
         <p class="text-center font-semibold truncate">
             {{ $product->title }}
         </p>
 
-        @php
-            $discount = $product->discounts->first();
+        @if($product->active_discount_percentage && $product->price !== null)
+            <p class="text-center text-xs text-red-600 mb-1"><span class="line-through text-gray-400">Rp {{ number_format($product->price, 0, ',', '.') }}</span> · Diskon {{ $product->active_discount_percentage }}%</p>
+        @endif
+        <p class="text-center font-semibold text-sky-600">
+            {{ $product->formatted_price }}
+        </p>
 
-            $discountPercent = $discount?->percentage ?? 0;
-
-            $finalPrice =
-                $discountPercent > 0 ? $product->price - ($product->price * $discountPercent) / 100 : $product->price;
-        @endphp
-
-        @if ($discountPercent > 0)
-            <div class="text-center flex g-3 justify-center">
-                <p class="text-sm text-gray-400 line-through">
-                    Rp {{ number_format($product->price, 0, ',', '.') }}
-                </p>
-
-                <p class="font-semibold text-red-600">
-                    Rp {{ number_format($finalPrice, 0, ',', '.') }}
-                </p>
-
-                <span class="inline-block mt-1 px-2 py-1 text-xs bg-red-100 text-red-600 rounded">
-                    -{{ $discountPercent }}%
-                </span>
-            </div>
-        @else
-            <p class="text-center font-semibold text-sky-600">
-                Rp {{ number_format($product->price, 0, ',', '.') }}
-            </p>
+        <p class="text-center text-xs text-gray-500 mb-2">{{ $product->active_discount_percentage ? 'Sumber harga dasar: ' : '' }}{{ $product->price_label }}</p>
+        <p class="text-center text-xs text-gray-500 mb-2">Tahun produksi: {{ $product->production_year ?? 'Belum diisi' }}{{ $product->production_year ? ' · data input, belum terverifikasi' : '' }}</p>
+        @if(isset($product->ratings_count))
+            <p class="text-center text-xs text-gray-500 mb-2">{{ $product->ratings_count ? number_format($product->ratings_avg_rating, 1, ',', '.') . ' / 5 · ' . $product->ratings_count . ' ulasan' : 'Belum ada ulasan' }}</p>
         @endif
         <a href="{{ route('product.show', $product->id) }}" @click.stop
             class="block w-full text-center py-2 bg-sky-600 text-white rounded hover:bg-sky-700 transition">

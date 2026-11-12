@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 class CommentController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      */
@@ -41,30 +40,31 @@ class CommentController extends Controller
 
         return view('comments.create', compact('products', 'parents'));
     }
-    
+
     public function store(Request $request, Product $product)
     {
+        abort_unless($product->status === 'active', 404);
         $validated = $request->validate([
-            'comment'   => 'required|string|max:2000',
-            'rating'    => 'required|integer|between:1,5',
-            'parent_id' => 'nullable|exists:comments,id',
+            'comment' => 'required|string|max:2000',
+            'rating' => 'required|integer|between:1,5',
+            'parent_id' => ['nullable', \Illuminate\Validation\Rule::exists('comments', 'id')->where('commentable_id', $product->id)->where('commentable_type', $product->getMorphClass())->where('status', 'approved')],
         ]);
 
         DB::transaction(function () use ($validated, $product) {
 
             // Simpan komentar
             $product->comments()->create([
-                'user_id'   => Auth::id(),
+                'user_id' => Auth::id(),
                 'parent_id' => $validated['parent_id'] ?? null,
-                'comment'   => $validated['comment'],
-                'status'    => 'pending',
+                'comment' => $validated['comment'],
+                'status' => 'pending',
             ]);
 
             // Simpan atau update rating
             Rating::updateOrCreate(
                 [
                     'product_id' => $product->id,
-                    'user_id'    => Auth::id(),
+                    'user_id' => Auth::id(),
                 ],
                 [
                     'rating' => $validated['rating'],
@@ -84,7 +84,7 @@ class CommentController extends Controller
             'user',
             'product',
             'parent',
-            'replies.user'
+            'replies.user',
         ]);
 
         return view('comments.show', compact('comment'));
@@ -115,18 +115,18 @@ class CommentController extends Controller
     {
         $validated = $request->validate([
             'product_id' => ['required', 'exists:products,id'],
-            'parent_id'  => ['nullable', 'exists:comments,id'],
-            'comment'    => ['required', 'string', 'max:2000'],
-            'status'     => ['required', 'in:pending,approved,rejected'],
+            'parent_id' => ['nullable', 'exists:comments,id'],
+            'comment' => ['required', 'string', 'max:2000'],
+            'status' => ['required', 'in:pending,approved,rejected'],
         ]);
 
         DB::transaction(function () use ($validated, $comment) {
 
             $comment->update([
                 'product_id' => $validated['product_id'],
-                'parent_id'  => $validated['parent_id'] ?? null,
-                'comment'    => $validated['comment'],
-                'status'     => $validated['status'],
+                'parent_id' => $validated['parent_id'] ?? null,
+                'comment' => $validated['comment'],
+                'status' => $validated['status'],
             ]);
         });
 

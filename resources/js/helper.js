@@ -19,19 +19,40 @@ export default function createCompareApp() {
             try {
                 const saved = localStorage.getItem("compare_items");
                 const parsed = saved ? JSON.parse(saved) : [];
-                this.items = Array.isArray(parsed) ? parsed : [];
+                this.items = this.normalizeItems(parsed);
             } catch {
                 this.items = [];
             }
 
             window.addEventListener("storage", (e) => {
                 if (e.key === "compare_items") {
-                    this.items = JSON.parse(e.newValue || "[]");
+                    try { this.items = this.normalizeItems(JSON.parse(e.newValue || "[]")); }
+                    catch { this.items = []; }
                 }
             });
 
+            // A completed pair is never a pending selection, including on browser Back.
+            window.addEventListener("pageshow", () => {
+                this.redirecting = false;
+                try { this.items = this.normalizeItems(JSON.parse(localStorage.getItem("compare_items") || "[]")); }
+                catch { this.items = []; }
+                this.save();
+            });
+            this.save();
             this.initScrollSpy();
         },
+        normalizeItems(value) {
+            if (!Array.isArray(value)) return [];
+            const ids = [...new Set(value.filter(id => /^\d+$/.test(String(id)) && Number(id) > 0).map(String))];
+            return ids.length < 2 ? ids : [];
+        },
+
+        clearSelection() {
+            this.items = [];
+            this.redirecting = false;
+            this.save();
+        },
+
         toggle(id) {
             if (!id) return;
             id = String(id);
@@ -43,8 +64,7 @@ export default function createCompareApp() {
             }
 
             if (this.items.length >= 2) {
-                alert("Maksimal 2 produk");
-                return;
+                this.clearSelection();
             }
 
             this.items.push(id);
@@ -52,7 +72,7 @@ export default function createCompareApp() {
 
             if (this.items.length === 2 && !this.redirecting) {
                 this.redirecting = true;
-                setTimeout(() => this.redirect(), 300);
+                this.redirect();
             }
         },
 
@@ -80,7 +100,7 @@ export default function createCompareApp() {
         },
 
         formatPrice(price) {
-            if (!price) return "Rp 0";
+            if (price === null || price === undefined || price === "") return "Harga belum tersedia";
 
             return new Intl.NumberFormat("id-ID", {
                 style: "currency",

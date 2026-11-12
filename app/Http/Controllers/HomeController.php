@@ -2,15 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\CompareHelper;
-use App\Models\Discount;
 use App\Models\HeadlineSlide;
 use App\Models\Product;
-use App\Models\ProductFinalScore;
-use App\Models\ProductSalesStat;
 use App\Services\CompareService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -20,29 +15,25 @@ class HomeController extends Controller
             ->orderBy('position')
             ->get();
 
-        $discounts = Product::whereHas('discounts')
+        $discounts = Product::where('status', 'active')->whereHas('discounts', fn ($query) => $query
+            ->whereDate('start_date', '<=', today())->whereDate('end_date', '>=', today()))
             ->with('discounts')
             ->get();
         /**
          * TOP PENJUALAN
          */
-        $topSales = Product::query()
+        $salesPeriod = \App\Models\ProductSalesStat::verifiedReal()->select('year', 'month')->orderByDesc('year')->orderByDesc('month')->first();
+        $topSales = $salesPeriod ? Product::query()
             ->where('status', 'active')
-            ->withSum('salesStats', 'total_sold')
+            ->whereHas('salesStats', fn ($q) => $q->verifiedReal()->where('year', $salesPeriod->year)->where('month', $salesPeriod->month)->where('total_sold', '>', 0))
+            ->withSum(['salesStats' => fn ($q) => $q->verifiedReal()->where('year', $salesPeriod->year)->where('month', $salesPeriod->month)], 'total_sold')
             ->orderByDesc('sales_stats_sum_total_sold')
             ->limit(8)
-            ->get();
+            ->get() : collect();
 
-        /**
-         * REKOMENDASI PRODUK
-         * Rekomendasi produk ini berdasarkan nilai final_score yang ada di tabel:
-         */
-        $recommendedProducts = Product::select('products.*')
-            ->join('product_final_scores', 'product_final_scores.product_id', '=', 'products.id')
-            ->where('products.status', 'active')
-            ->orderByDesc('product_final_scores.final_score')
-            ->limit(8)
-            ->get();
+        $recommendations = (new \App\Services\ProductRecommendations)->get();
+        $recommendedProducts = $recommendations['products'];
+        $recommendationDescription = $recommendations['description'];
 
         /**
          * LIST PRODUK (DENGAN PAGINATION)
@@ -55,55 +46,36 @@ class HomeController extends Controller
             'headlines',
             'discounts',
             'topSales',
+            'salesPeriod',
             'recommendedProducts',
+            'recommendationDescription',
             'products'
         ));
     }
 
-    public function gallery(Request $request)
+    public function gallery(Request $request, \App\Services\CatalogueQuery $catalogue)
     {
-        $request->validate([
+        $filters = $request->validate([
             'price_min' => 'nullable|integer|min:0',
             'price_max' => 'nullable|integer|min:0',
             'sort' => 'nullable|in:newest,oldest,best,worst',
-            'date' => 'nullable|date',
+            'year' => ['nullable', 'regex:/^(unknown|19[0-9]{2}|20[0-9]{2})$/'],
         ]);
+        if (isset($filters['price_min'], $filters['price_max']) && $filters['price_max'] < $filters['price_min']) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['price_max' => 'Harga maksimum harus lebih besar atau sama dengan harga minimum.']);
+        }
+        $products = $catalogue->build($filters)->paginate(12)->withQueryString();
+        $productionYears = Product::where('status', 'active')->whereNotNull('production_year')
+            ->distinct()->orderByDesc('production_year')->pluck('production_year');
 
-        $products = Product::query()
-            ->when($request->price_min, function ($q) use ($request) {
-                $q->where('products.price', '>=', $request->price_min);
-            })
-            ->when($request->price_max, function ($q) use ($request) {
-                $q->where('products.price', '<=', $request->price_max);
-            })
-            ->when($request->year, function ($q) use ($request) {
-                $q->whereYear('products.created_at', $request->year);
-            })
-            ->when($request->sort, function ($q) use ($request) {
-
-                switch ($request->sort) {
-
-                    case 'newest':
-                        $q->orderBy('products.created_at', 'desc');
-                        break;
-
-                    case 'oldest':
-                        $q->orderBy('products.created_at', 'asc');
-                        break;
-                }
-            }, function ($q) {
-                $q->latest('products.created_at');
-            })
-            ->paginate(12);
-
-        return view('pages.home.gallery', compact('products'));
+        return view('pages.home.gallery', compact('products', 'productionYears'));
     }
 
     public function compare(Request $request, CompareService $service)
     {
         // Validasi & sanitasi ids
         $ids = collect(explode(',', (string) $request->ids))
-            ->filter(fn($id) => is_numeric($id))
+            ->filter(fn ($id) => is_numeric($id))
             ->unique()
             ->take(2)
             ->values();
@@ -113,16 +85,23 @@ class HomeController extends Controller
 
             return view('pages.home.compare.error', [
                 'products' => collect(),
-                'error' => 'Pilih tepat 2 produk untuk dibandingkan'
+                'error' => 'Pilih tepat 2 produk untuk dibandingkan',
             ]);
         }
 
         // Ambil produk + eager load
+        $report = \App\Models\ProductSalesStat::verifiedReal()->whereIn('product_id', $ids)->orderByDesc('year')->orderByDesc('month')->first();
+        $salesFilter = fn ($q) => $q->verifiedReal()->where('year', $report?->year ?? 0)->where('month', $report?->month ?? 0)->where('source', $report?->source ?? '');
         $products = Product::query()
             ->whereIn('id', $ids)
+            ->where('status', 'active')
             ->with([
-                'specifications.specification.category'
+                'specificationScores.specification.group',
+                'specifications.specification',
             ])
+            ->withSum(['salesStats as sold' => $salesFilter], 'total_sold')
+            ->withCount(['salesStats' => $salesFilter])
+            ->withAvg(['ratings as rating' => fn ($q) => $q->real()], 'rating')
             ->get()
             ->keyBy('id');
 
@@ -131,7 +110,7 @@ class HomeController extends Controller
 
             return view('pages.home.compare.error', [
                 'products' => collect(),
-                'error' => 'Produk tidak ditemukan'
+                'error' => 'Produk tidak ditemukan',
             ]);
         }
 
@@ -140,25 +119,36 @@ class HomeController extends Controller
         $productB = $products->get($ids[1]);
 
         // Safety check
-        if (!$productA || !$productB) {
+        if (! $productA || ! $productB) {
 
             return view('pages.home.compare.error', [
                 'products' => collect(),
-                'error' => 'Produk compare tidak valid'
+                'error' => 'Produk compare tidak valid',
             ]);
         }
 
         // Compare engine
-        $result = $service->compare($productA, $productB);
+        $groups = \App\Models\SpecificationGroup::orderBy('id')->pluck('name', 'id')->all();
+        $result = $service->compare($productA, $productB, $groups);
 
         return view('pages.home.compare', [
+            'salesPeriodLabel' => $report ? sprintf('%02d/%d', $report->month, $report->year).' · '.$report->source : 'Belum ada laporan terverifikasi',
             'productA' => $productA,
             'productB' => $productB,
-            'percentA' => $result['percentA'] ?? 0,
-            'percentB' => $result['percentB'] ?? 0,
+            'percentA' => $result['percentA'],
+            'percentB' => $result['percentB'],
             'metricsA' => $result['metricsA'] ?? [],
             'metricsB' => $result['metricsB'] ?? [],
-            'reasons'  => $result['reasons'] ?? [],
+            'reasons' => $result['reasons'],
+            'labels' => $result['labels'],
+            'hasData' => $result['hasData'],
+            'hasDemoData' => $result['hasDemoData'],
+            'winner' => $result['winner'],
+            'comparisonStatus' => $result['comparisonStatus'],
+            'specificationRows' => $result['specificationRows'],
+            'scoreCriteria' => $result['scoreCriteria'],
+            'missingGroups' => $result['missingGroups'],
+            'comparedCount' => $result['comparedCount'],
         ]);
     }
 
@@ -169,24 +159,27 @@ class HomeController extends Controller
 
     public function show(Product $product)
     {
-        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei'];
-        $ratings = [4.1, 4.2, 4.4, 4.6, 4.8];
-
+        abort_unless($product->status === 'active', 404);
         $product->load([
             'category',
-            'ratings.user',
+            'specifications.specification.group',
+            'ratings' => fn ($q) => $q->real()->with('user'),
             'salesStat',
         ]);
 
         // Statistik Produk
         $averageRating = round($product->ratings->avg('rating') ?? 0, 1);
-        $totalRatings  = $product->ratings->count();
-        $totalSold = $product->salesStats()->sum('total_sold');
-        $totalViews    = $product->clicks()->count();
+        $totalRatings = $product->ratings->count();
+        $sale = $product->salesStats()->verifiedReal()->orderByDesc('year')->orderByDesc('month')->first();
+        $totalSold = $sale?->total_sold;
+        $salesPeriodLabel = $sale ? sprintf('%02d/%d', $sale->month, $sale->year) : 'Belum ada laporan terverifikasi';
+        $totalViews = $product->clicks()->count();
 
         // Hanya komentar yang sudah approve
         $comments = $product->comments()
             ->where('status', 'approved')
+            ->where('comment', 'not like', '[SIMULASI PENGUJIAN]%')
+            ->whereHas('user', fn ($q) => $q->where('is_active', true))
             ->with('user')
             ->latest()
             ->paginate(10);
@@ -209,10 +202,10 @@ class HomeController extends Controller
 
         $reviews = $comments->through(function ($comment) use ($ratingMap) {
             return (object) [
-                'user'       => $comment->user,
-                'comment'    => $comment->comment,
-                'status'     => $comment->status,
-                'rating'     => optional($ratingMap->get($comment->user_id))->rating ?? 0,
+                'user' => $comment->user,
+                'comment' => $comment->comment,
+                'status' => $comment->status,
+                'rating' => optional($ratingMap->get($comment->user_id))->rating ?? 0,
                 'created_at' => $comment->created_at,
             ];
         });
@@ -223,10 +216,9 @@ class HomeController extends Controller
             'averageRating',
             'totalRatings',
             'totalSold',
+            'salesPeriodLabel',
             'totalViews',
             'ratingPercent',
-            'months',
-            'ratings',
             'reviews'
         ));
     }

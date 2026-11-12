@@ -1,0 +1,11 @@
+<div class="overflow-x-auto mt-5">
+<table class="w-full text-sm text-left"><thead class="bg-gray-50"><tr><th class="p-3">Produk</th><th class="p-3">Harga / tanggal</th><th class="p-3">Fitur</th><th class="p-3">Unit terjual</th><th class="p-3">Bukti</th></tr></thead><tbody class="divide-y">
+@foreach($snapshot['rows'] as $row)
+<tr><td class="p-3 font-medium">{{ $row['code'] }}<br>{{ $row['title'] }} @if($row['is_simulated'] ?? false)<span class="block text-amber-800 mt-2">SIMULASI</span>@endif</td><td class="p-3">Rp {{ number_format($row['values'][0],0,',','.') }}<br>{{ $row['price']['observed_on'] }}</td><td class="p-3">{{ number_format($row['values'][1],1,',','.') }} / 100</td><td class="p-3">{{ number_format($row['values'][2],0,',','.') }}</td><td class="p-3 break-words">Harga: {{ $row['price']['source'] }} — {{ $row['price']['reference'] }}<br>Penjualan: {{ $row['sales']['source'] }} — {{ $row['sales']['reference'] }}<details class="mt-2"><summary class="cursor-pointer text-blue-700">Kriteria fitur</summary>@foreach($row['features']['criteria'] as $criterion)<p class="mt-2">{{ $criterion['name'] }}: {{ $criterion['value'] }} {{ $criterion['unit'] }} · acuan {{ $criterion['reference'] }} · bobot {{ $criterion['weight'] }}@foreach($criterion['sources'] as $source)<span class="block text-gray-500">{{ $source['url'] ?? $source['path'] ?? $source['note'] ?? '' }}</span>@endforeach</p>@endforeach</details>
+@if(!empty($row['assumptions']))<details class="mt-2"><summary class="text-amber-900 cursor-pointer">Asumsi pengujian produk ini</summary>@foreach($row['assumptions'] as $assumption)<p class="mt-2 text-amber-900">{{ $assumption }}</p>@endforeach</details>@endif
+</td></tr>
+@endforeach
+</tbody></table></div>
+@if(count($snapshot['excluded']))
+<details class="mt-5 rounded-xl bg-amber-50 p-4"><summary class="cursor-pointer font-medium text-amber-900">Produk yang belum masuk dataset ({{ count($snapshot['excluded']) }})</summary><div class="divide-y mt-3">@foreach($snapshot['excluded'] as $row)<div class="py-3"><p class="font-medium">{{ $row['code'] }} — {{ $row['title'] }}</p>@foreach($row['reasons'] as $reason)<p class="text-sm text-gray-700 mt-1">{{ $reason }}</p>@endforeach</div>@endforeach</div></details>
+@endif

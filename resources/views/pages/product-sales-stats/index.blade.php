@@ -9,7 +9,7 @@
                 <div class="flex justify-between items-center mb-4">
 
                     <h2 class="text-xl font-semibold">
-                        Product Sales Statistics
+                        Penjualan Bulanan
                     </h2>
 
                     @can('create.product.sales')
@@ -24,6 +24,9 @@
 
                 </div>
 
+                <a href="{{ route('sales-import.index') }}" class="inline-block mb-4 px-4 py-2 rounded border text-blue-700">Kesiapan Data &amp; Impor Excel</a>
+                @if($errors->any())<div class="mb-4 p-3 bg-red-50 text-red-800">{{ $errors->first() }}</div>@endif
+                @if(session('success'))<div class="mb-4 p-3 bg-green-50 text-green-800">{{ session('success') }}</div>@endif
                 {{-- TABLE --}}
                 <table class="min-w-full border">
 
@@ -76,7 +79,7 @@
                                 </td>
 
                                 <td class="border px-4 py-2 text-center">
-                                    {{ number_format($stat->total_sold) }}
+                                    {{ number_format($stat->total_sold) }}<p class="text-xs text-gray-500">{{ $stat->is_simulated ? 'Simulasi' : ($stat->verification_status === 'verified' ? 'Terverifikasi' : 'Belum diverifikasi') }}</p>
                                 </td>
 
                                 @canany(['edit.product.sales','delete.product.sales'])
@@ -249,6 +252,10 @@
 
                         </div>
 
+                        <div><label class="block mb-1">Sumber laporan</label><input name="source" x-model="form.source" required maxlength="255" class="w-full border rounded"></div>
+                        <div><label class="block mb-1">Referensi / nomor laporan</label><input name="source_reference" x-model="form.source_reference" required maxlength="2000" class="w-full border rounded"></div>
+                        <div><label class="block mb-1">Verifikasi</label><select name="verification_status" x-model="form.verification_status" class="w-full border rounded"><option value="unverified">Belum diverifikasi</option><option value="verified">Sudah diperiksa terhadap laporan sumber</option></select></div>
+                        <div><label class="block mb-1">Jenis data</label><select name="is_simulated" x-model="form.is_simulated" class="w-full border rounded"><option value="0">Laporan nyata</option><option value="1">Simulasi pengujian</option></select></div>
                     </div>
 
                     <div class="flex justify-end gap-3 mt-6">
@@ -296,7 +303,7 @@
                     product_id:'',
                     month:new Date().getMonth()+1,
                     year:new Date().getFullYear(),
-                    total_sold:0
+                    total_sold:'', source:'', source_reference:'', verification_status:'unverified', is_simulated:0
                 },
 
                 openCreate(){
@@ -308,7 +315,7 @@
                         product_id:'',
                         month:new Date().getMonth()+1,
                         year:new Date().getFullYear(),
-                        total_sold:0
+                        total_sold:'', source:'', source_reference:'', verification_status:'unverified', is_simulated:0
                     }
 
                     this.open=true;
@@ -324,7 +331,7 @@
                         product_id:stat.product_id,
                         month:stat.month,
                         year:stat.year,
-                        total_sold:stat.total_sold
+                        total_sold:stat.total_sold, source:stat.source || '', source_reference:stat.source_reference || '', verification_status:stat.verification_status || 'unverified', is_simulated:stat.is_simulated ? 1 : 0
                     }
 
                     this.open=true;

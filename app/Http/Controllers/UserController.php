@@ -16,7 +16,7 @@ class UserController extends Controller
     {
         return view('pages.users.index', [
             'users' => User::with('roles')->paginate(10),
-            'roles' => Role::all(),
+            'roles' => Role::whereIn('name', ['admin', 'owner', 'pelanggan'])->get(),
         ]);
     }
 
@@ -34,17 +34,17 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'      => 'required|string|max:100',
-            'email'     => 'required|email|unique:users,email',
-            'password'  => 'required|min:6',
-            'role'      => 'required|exists:roles,name',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'role' => 'required|in:admin,owner,pelanggan|exists:roles,name',
             'is_active' => 'required|boolean',
         ]);
 
         $user = User::create([
-            'name'      => $validated['name'],
-            'email'     => $validated['email'],
-            'password'  => Hash::make($validated['password']),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
             'is_active' => $validated['is_active'],
         ]);
 
@@ -60,11 +60,9 @@ class UserController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'User berhasil disimpan',
-                'data' => $user
+                'data' => $user,
             ], 201);
         }
-
-        return back()->withErrors($validated)->withInput();
 
         return redirect()
             ->route('users.index')
@@ -93,20 +91,20 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
-            'name'      => 'required|string|max:100',
-            'email'     => 'required|email|unique:users,email,' . $user->id,
-            'role'      => 'required|string',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'role' => 'required|in:admin,owner,pelanggan|exists:roles,name',
             'is_active' => 'required|boolean',
-            'password'  => 'nullable|min:6',
+            'password' => 'nullable|min:6',
         ]);
 
         $data = [
-            'name'      => $validated['name'],
-            'email'     => $validated['email'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
             'is_active' => $validated['is_active'],
         ];
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $data['password'] = Hash::make($validated['password']);
         }
 
@@ -117,7 +115,7 @@ class UserController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'User berhasil diupdate',
-                'data'    => $user->load('roles'),
+                'data' => $user->load('roles'),
             ], 200);
         }
 
@@ -126,12 +124,14 @@ class UserController extends Controller
             ->route('users.index')
             ->with('success', 'User berhasil diupdate');
     }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(User $user)
     {
         $user->delete();
+
         return back()->with('success', 'User berhasil dihapus');
     }
 }

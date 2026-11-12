@@ -5,11 +5,11 @@
 
             {{-- PRODUCT --}}
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="grid lg:grid-cols-2 gap-10 p-8">
+                <div class="grid lg:grid-cols-2 gap-8 lg:gap-10 p-5 sm:p-8">
 
                     <div>
                         <div class="rounded-xl overflow-hidden border">
-                            <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-[500px] object-cover"
+                            <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-auto max-h-[500px] object-contain bg-slate-50"
                                 alt="{{ $product->title }}">
                         </div>
                     </div>
@@ -24,41 +24,37 @@
                             </div>
                         @endif
 
-                        <h1 class="text-4xl font-bold text-gray-900">
+                        <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                             {{ $product->title }}
                         </h1>
-                        @php
-                            $discount = $product->discounts->first();
-
-                            $discountPercent = $discount?->percentage ?? 0;
-
-                            $finalPrice =
-                                $discountPercent > 0
-                                    ? $product->price - ($product->price * $discountPercent) / 100
-                                    : $product->price;
-                        @endphp
 
                         <div class="mt-6">
-                            @if ($discountPercent > 0)
-                                <p class="text-xl text-gray-400 line-through">
-                                    Rp {{ number_format($product->price, 0, ',', '.') }}
-                                </p>
-
-                                <h2 class="text-4xl font-bold text-green-600">
-                                    Rp {{ number_format($finalPrice, 0, ',', '.') }}
-                                </h2>
-
-                                <span
-                                    class="inline-flex items-center mt-2 px-3 py-1 rounded-full bg-red-100 text-red-600 text-sm font-semibold">
-                                    Hemat {{ $discountPercent }}%
-                                </span>
-                            @else
-                                <h2 class="text-4xl font-bold text-green-600">
-                                    Rp {{ number_format($product->price, 0, ',', '.') }}
-                                </h2>
+                            @if($product->active_discount_percentage && $product->price !== null)
+                                <p class="text-sm text-red-600 mb-2"><span class="line-through text-gray-400">Rp {{ number_format($product->price, 0, ',', '.') }}</span> · Diskon {{ $product->active_discount_percentage }}%</p>
+                            @endif
+                            <h2 class="text-3xl sm:text-4xl font-bold text-sky-600 tracking-tight">
+                                {{ $product->formatted_price }}
+                            </h2>
+                            @if($product->official_url && in_array(strtolower(parse_url($product->official_url, PHP_URL_SCHEME) ?? ''), ['https', 'http']))
+                                <a href="{{ $product->official_url }}" target="_blank" rel="noopener noreferrer" aria-label="Kunjungi website resmi" class="official-product-link group mt-6 flex items-center gap-4 rounded-2xl border border-sky-100 bg-sky-50 p-4 sm:p-5 hover:border-sky-300 hover:shadow-md transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-600">
+                                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-sky-600 shadow-sm">
+                                        <svg aria-hidden="true" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M3 9l2-5h14l2 5M3 9h18v3a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0V9Zm2 6v5h14v-5M9 20v-4h6v4"/></svg>
+                                    </span>
+                                    <span class="min-w-0 flex-1">
+                                        <span class="block text-xs font-medium text-sky-700">Website resmi produk</span>
+                                        <span class="block font-semibold text-slate-900 mt-1">Lihat produk & ketersediaan</span>
+                                        <span class="block text-xs text-slate-500 mt-1 break-all">{{ parse_url($product->official_url, PHP_URL_HOST) }} · Buka di tab baru</span>
+                                    </span>
+                                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white group-hover:bg-sky-700 transition">
+                                        <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M7 7h10v10"/></svg>
+                                    </span>
+                                </a>
                             @endif
                         </div>
 
+                        <p class="text-sm text-gray-500 mt-3">Tahun produksi: {{ $product->production_year ?? 'Belum diisi' }}{{ $product->production_year ? ' · data input, belum terverifikasi' : '' }}</p>
+                        @include('components.release-reference', ['product' => $product])
+                        @include('components.price-reference', ['product' => $product])
                         <hr class="my-8">
 
                         <div>
@@ -67,37 +63,76 @@
                             </h3>
 
                             <div class="prose max-w-none">
-                                {!! $product->description !!}
+                                {!! app(\App\Services\SafeProductHtml::class)->clean($product->description ?? '') !!}
                             </div>
 
 
-                            {{-- ANALYTICS --}}
-                            <div class="grid md:grid-cols-4 gap-5 mt-8">
+                            @if($product->reference_metadata)
+                                <details class="mt-5 border rounded-xl p-4">
+                                    <summary class="cursor-pointer font-semibold">Spesifikasi dan asal data</summary>
+                                    <div class="overflow-x-auto mt-3">
+                                        <table class="w-full text-sm text-left">
+                                            <thead><tr class="border-b"><th class="py-2 pr-3">Spesifikasi</th><th class="py-2 pr-3">Nilai</th><th class="py-2">Sumber</th></tr></thead>
+                                            <tbody>
+                                                @foreach($product->specifications as $item)
+                                                    @php($reference = $product->reference_metadata['specifications'][$item->specification_id] ?? null)
+                                                    @if($reference && ($reference['public'] ?? true) && $item->specification)
+                                                        <tr class="border-b">
+                                                            <td class="py-2 pr-3">{{ $item->specification->name }}</td>
+                                                            <td class="py-2 pr-3">{{ $item->specification->data_type === 'boolean' ? ($item->value == '1' ? 'Didukung' : 'Tidak didukung') : $item->value . ($item->specification->unit ? ' ' . $item->specification->unit : '') }}</td>
+                                                            <td class="py-2">
+                                                                @if(isset($reference['verified_value']) && (is_numeric($reference['verified_value']) && is_numeric($item->value) ? abs((float) $reference['verified_value'] - (float) $item->value) > 0.000001 : (string) $reference['verified_value'] !== (string) $item->value))
+                                                                    <span class="text-amber-700">Nilai berubah; menunggu verifikasi ulang.</span>
+                                                                @else
+                                                                @foreach($reference['sources'] as $source)
+                                                                    @if($source['type'] === 'official')
+                                                                        <a class="underline" href="{{ $source['url'] }}">Resmi</a>
+                                                                    @elseif($source['type'] === 'seller')
+                                                                        <a class="underline" href="{{ $source['url'] }}" target="_blank" rel="noopener noreferrer">Penjual</a>
+                                                                    @else
+                                                                        <a class="underline" href="{{ asset('storage/'.$source['path']) }}">Foto</a>
+                                                                    @endif
+                                                                @endforeach
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </details>
+                            @endif
 
+                            <div class="grid grid-cols-2 gap-3 mt-8 product-statistics">
                                 <div class="bg-white rounded-2xl p-6 shadow-sm border">
-                                    <p class="text-gray-500 text-sm">Rating</p>
-                                    <h2 class="text-3xl font-bold mt-2">
-                                        {{ number_format($averageRating, 1) }}
+                                    <p class="text-gray-500 text-sm">Rating pengguna aplikasi</p>
+                                    @if($product->ratings->contains(fn ($rating) => str_starts_with($rating->review ?? '', '[SIMULASI PENGUJIAN]')))
+                                        <p class="text-amber-700 text-xs">Termasuk ulasan simulasi pengujian</p>
+                                    @endif
+                                    <h2 class="product-stat-value">
+                                        {{ $totalRatings ? number_format($averageRating, 1) : '—' }}
                                     </h2>
                                 </div>
 
                                 <div class="bg-white rounded-2xl p-6 shadow-sm border">
                                     <p class="text-gray-500 text-sm">Review</p>
-                                    <h2 class="text-3xl font-bold mt-2">
+                                    <h2 class="product-stat-value">
                                         {{ number_format($totalRatings) }}
                                     </h2>
                                 </div>
 
                                 <div class="bg-white rounded-2xl p-6 shadow-sm border">
-                                    <p class="text-gray-500 text-sm">Terjual</p>
-                                    <h2 class="text-3xl font-bold mt-2">
-                                        {{ number_format($totalSold) }}
+                                    <p class="text-gray-500 text-sm">Terjual terverifikasi</p>
+                                    <p class="text-gray-500 text-xs mt-1">{{ $salesPeriodLabel }}</p>
+                                    <h2 class="product-stat-value">
+                                        {{ $totalSold === null ? '—' : number_format($totalSold, 0, ',', '.') }}
                                     </h2>
                                 </div>
 
                                 <div class="bg-white rounded-2xl p-6 shadow-sm border">
                                     <p class="text-gray-500 text-sm">Views</p>
-                                    <h2 class="text-3xl font-bold mt-2">
+                                    <h2 class="product-stat-value">
                                         {{ number_format($totalViews) }}
                                     </h2>
                                 </div>

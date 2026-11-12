@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
+<header x-data="{ mobileMenu: false }" class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
 
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
 
@@ -9,7 +9,7 @@
 
                 <a href="{{ route('home') }}" class="flex items-center gap-3">
 
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10 w-auto">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 sm:h-10 w-auto">
 
                 </a>
 
@@ -50,6 +50,7 @@
 
             <!-- Right -->
             <div class="flex items-center gap-4">
+                <button type="button" @click="mobileMenu = !mobileMenu" :aria-expanded="mobileMenu" aria-controls="mobile-catalogue-menu" aria-label="Menu navigasi" class="md:hidden rounded-lg p-2 text-sky-700 border border-sky-100"><svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
 
                 @guest
 
@@ -72,9 +73,9 @@
                 @auth
 
                     {{-- Dashboard hanya untuk Admin --}}
-                    @if (Auth::user()->hasRole(['super admin', 'admin']))
+                    @if (Auth::user()->can('view.dashboard'))
                         <a href="{{ route('dashboard') }}"
-                            class="px-5 py-2.5 rounded-xl bg-sky-600 text-white font-medium hover:bg-sky-700 transition">
+                            class="hidden sm:inline-flex px-5 py-2.5 rounded-xl bg-sky-600 text-white font-medium hover:bg-sky-700 transition">
 
                             Dashboard
 
@@ -143,7 +144,7 @@
 
                             <div class="py-2">
 
-                                @if (Auth::user()->hasRole(['super admin', 'admin']))
+                                @if (Auth::user()->can('view.dashboard'))
                                     <a href="{{ route('dashboard') }}"
                                         class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition">
 
@@ -180,6 +181,9 @@
             </div>
         </div>
 
+        <nav id="mobile-catalogue-menu" x-show="mobileMenu" x-cloak class="md:hidden grid grid-cols-2 gap-2 border-t py-3 text-sm">
+            <a href="{{ route('home') }}" class="rounded-lg p-3 hover:bg-sky-50">Beranda</a><a href="{{ route('gallery.index') }}" class="rounded-lg p-3 hover:bg-sky-50">Produk</a><a href="{{ route('versus.index') }}" class="rounded-lg p-3 hover:bg-sky-50">Perbandingan</a><a href="{{ route('contact.index') }}" class="rounded-lg p-3 hover:bg-sky-50">Hubungi kami</a>
+        </nav>
     </div>
 
 </header>

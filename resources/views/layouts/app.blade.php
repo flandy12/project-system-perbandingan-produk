@@ -23,13 +23,15 @@
     <x-banner />
 
     <!-- APP WRAPPER -->
-    <div class="flex min-h-screen">
+    <div x-data="{ cmsMenu: false }" @keydown.escape.window="cmsMenu = false" class="flex min-h-screen">
+        <button type="button" @click="cmsMenu = !cmsMenu" :aria-expanded="cmsMenu" aria-label="Menu pengelolaan" class="md:hidden fixed bottom-5 left-5 z-[60] rounded-full bg-sky-600 text-white px-5 py-3 shadow-lg">Menu</button>
+        <div x-show="cmsMenu" x-cloak @click="cmsMenu = false" class="md:hidden fixed inset-0 bg-slate-900/40 z-40"></div>
 
         <!-- SIDEBAR -->
         @include('sidebar')
 
         <!-- CONTENT AREA -->
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 min-w-0 flex flex-col">
 
             <!-- PAGE HEADER -->
             @if (isset($header))

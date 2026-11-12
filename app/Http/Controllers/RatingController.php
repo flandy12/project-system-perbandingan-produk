@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Rating;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RatingController extends Controller
@@ -26,7 +26,7 @@ class RatingController extends Controller
                 1
             ),
             'total_ratings' => Rating::where('product_id', $product->id)->count(),
-            'data' => $ratings
+            'data' => $ratings,
         ]);
     }
 
@@ -35,22 +35,23 @@ class RatingController extends Controller
      */
     public function store(Request $request)
     {
+        abort_unless($request->user()?->fresh()?->is_active, 403);
         $request->validate([
             'product_id' => [
                 'required',
-                'exists:products,id'
+                \Illuminate\Validation\Rule::exists('products', 'id')->where('status', 'active'),
             ],
             'rating' => [
                 'required',
                 'integer',
                 'min:1',
-                'max:5'
+                'max:5',
             ],
             'review' => [
                 'nullable',
                 'string',
-                'max:1000'
-            ]
+                'max:1000',
+            ],
         ]);
 
         DB::beginTransaction();
@@ -60,11 +61,11 @@ class RatingController extends Controller
             $rating = Rating::updateOrCreate(
                 [
                     'user_id' => auth()->id(),
-                    'product_id' => $request->product_id
+                    'product_id' => $request->product_id,
                 ],
                 [
                     'rating' => $request->rating,
-                    'review' => $request->review
+                    'review' => $request->review,
                 ]
             );
 
@@ -75,7 +76,7 @@ class RatingController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Rating berhasil disimpan',
-                'data' => $rating
+                'data' => $rating,
             ]);
         } catch (\Exception $e) {
 
@@ -83,7 +84,7 @@ class RatingController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Ulasan belum tersimpan. Silakan coba lagi.',
             ], 500);
         }
     }
@@ -99,7 +100,7 @@ class RatingController extends Controller
 
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
-            'review' => 'nullable|string|max:1000'
+            'review' => 'nullable|string|max:1000',
         ]);
 
         DB::beginTransaction();
@@ -108,7 +109,7 @@ class RatingController extends Controller
 
             $rating->update([
                 'rating' => $request->rating,
-                'review' => $request->review
+                'review' => $request->review,
             ]);
 
             $this->updateProductRating($rating->product_id);
@@ -118,7 +119,7 @@ class RatingController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Rating berhasil diperbarui',
-                'data' => $rating
+                'data' => $rating,
             ]);
         } catch (\Exception $e) {
 
@@ -126,7 +127,7 @@ class RatingController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Ulasan belum diperbarui. Silakan coba lagi.',
             ], 500);
         }
     }
@@ -148,7 +149,7 @@ class RatingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Rating berhasil dihapus'
+            'message' => 'Rating berhasil dihapus',
         ]);
     }
 
@@ -159,7 +160,7 @@ class RatingController extends Controller
     {
         $product = Product::find($productId);
 
-        if (!$product) {
+        if (! $product) {
             return;
         }
 
@@ -168,7 +169,7 @@ class RatingController extends Controller
                 Rating::where('product_id', $productId)->avg('rating') ?? 0,
                 1
             ),
-            'total_ratings' => Rating::where('product_id', $productId)->count()
+            'total_ratings' => Rating::where('product_id', $productId)->count(),
         ]);
     }
 }

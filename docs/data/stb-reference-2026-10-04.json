@@ -1,0 +1,405 @@
+{
+  "checked_at": "2026-10-04",
+  "sources": {
+    "kuning": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+    "merah_fm": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital",
+    "katalog_seri": "https://api.matrixparabola.com/assets/html/katalog_doc_69f81f76c62c1.html"
+  },
+  "products": {
+    "4": {
+      "price": 184000,
+      "description": "<p>STB Matrix Apple Kuning untuk menerima siaran TV digital DVB-T2.</p><ul><li>Chipset SUNPLUS 1509C.</li><li>Keluaran hingga Full HD 1080p; format MPEG-2, MPEG-4, dan H.264.</li><li>Halaman produk mencantumkan satu USB depan dan adaptor WiFi 7601/5370.</li><li>Mendukung IPTV, EWS, dan TV streaming.</li><li>Aplikasi tercantum: YouTube, YouTube Kids, dan WeTV.</li><li>Dimensi perangkat 16 × 10 × 6 cm.</li></ul><p>Catatan: jumlah USB berbeda dari katalog seri; cocokkan revisi perangkat. Penulisan satuan flash juga berbeda antar sumber. Fungsi aplikasi mengikuti firmware dan layanan terkait.</p><p>Sumber: <a href=\"https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital\">halaman resmi Apple Kuning</a>, diperiksa 4 Oktober 2026.</p>"
+    },
+    "6": {
+      "price": 298000,
+      "description": "<p>STB Matrix Apple Merah varian Radio FM untuk siaran TV digital.</p><ul><li>Keluaran hingga Full HD 1080p; format MPEG-2, MPEG-4, dan H.264.</li><li>Dua USB: depan dan belakang.</li><li>Mendukung Radio FM, IPTV, EWS, TV streaming, dan Mee Cast.</li><li>Aplikasi tercantum: YouTube, YouTube Kids, MiTube, Vidio, TikTok, dan WeTV.</li><li>Lima pilihan tema menu.</li><li>Ukuran kemasan 28 × 26 × 17 cm; bukan ukuran perangkat.</li></ul><p>Catatan: chipset varian FM tidak dirinci pada halaman produk. Satuan flash perlu dikonfirmasi. Fungsi aplikasi mengikuti firmware dan layanan terkait.</p><p>Sumber: <a href=\"https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital\">halaman resmi Apple Merah Radio FM</a>, diperiksa 4 Oktober 2026.</p>"
+    }
+  },
+  "scoring_rule": "min(raw_value / reference * 100, 100); hanya spesifikasi dengan skor di kedua produk; rata-rata per kelompok, lalu rata-rata kelompok",
+  "specifications": [
+    {
+      "name": "Chipset",
+      "group": "Teknologi",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "SUNPLUS 1509C",
+        "6": "Tidak dicantumkan pada halaman varian Radio FM"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Katalog seri Merah mencantumkan GX6701; belum dipastikan untuk varian FM. Nilai lama Sun GX6605 tidak terverifikasi."
+    },
+    {
+      "name": "Port Tersedia",
+      "group": "Koneksivitas",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "USB depan: 1; port lain belum diverifikasi",
+        "6": "USB depan: 1, belakang: 1; port lain belum diverifikasi"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Type C I/O pada data lama belum didukung sumber yang diperiksa. Katalog umum menyebut dua USB Kuning; halaman produk diutamakan."
+    },
+    {
+      "name": "Memori sesuai label produsen",
+      "group": "Teknologi",
+      "data_type": "numeric",
+      "unit": "Mb",
+      "values": {
+        "4": 512,
+        "6": 512
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": 512,
+      "note": "Pertahankan Mb sesuai halaman produk. Tidak diasumsikan 512 MB dan tidak mengukur kecepatan."
+    },
+    {
+      "name": "Flash sesuai label produsen",
+      "group": "Teknologi",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "4 Mb (halaman produk); 4 MB (katalog)",
+        "6": "8 Mb (halaman produk); 8 MB (katalog)"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Perbedaan penulisan bit/byte; kapasitas tidak diberi skor sampai satuan dikonfirmasi."
+    },
+    {
+      "name": "Resolusi keluaran maksimum",
+      "group": "Kualitas",
+      "data_type": "numeric",
+      "unit": "p",
+      "values": {
+        "4": 1080,
+        "6": 1080
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": 1080,
+      "note": "Kemampuan resolusi, bukan pengujian kejernihan atau penerimaan sinyal."
+    },
+    {
+      "name": "Format video",
+      "group": "Kualitas",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "MPEG-2, MPEG-4, H.264",
+        "6": "MPEG-2, MPEG-4, H.264"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": ""
+    },
+    {
+      "name": "Format audio",
+      "group": "Kualitas",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "MPEG-1, MPEG-2",
+        "6": "MPEG-1, MPEG-2"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": ""
+    },
+    {
+      "name": "Jumlah port USB",
+      "group": "Koneksivitas",
+      "data_type": "numeric",
+      "unit": "port",
+      "values": {
+        "4": 1,
+        "6": 2
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": 2,
+      "note": "Sesuai halaman produk; Kuning perlu dicocokkan dengan revisi perangkat karena katalog berbeda."
+    },
+    {
+      "name": "Adaptor WiFi yang disebut produsen",
+      "group": "Koneksivitas",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "7601 / 5370",
+        "6": null
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Halaman varian FM tidak merinci adaptor; jangan menganggap tidak mendukung."
+    },
+    {
+      "name": "Berbagi layar",
+      "group": "Koneksivitas",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "Mirroring disebut pada deskripsi; protokol tidak dirinci",
+        "6": "Mee Cast"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": ""
+    },
+    {
+      "name": "Dukungan IPTV",
+      "group": "Fitur",
+      "data_type": "boolean",
+      "unit": null,
+      "values": {
+        "4": 1,
+        "6": 1
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": 1,
+      "note": ""
+    },
+    {
+      "name": "Peringatan dini EWS",
+      "group": "Fitur",
+      "data_type": "boolean",
+      "unit": null,
+      "values": {
+        "4": 1,
+        "6": 1
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": 1,
+      "note": ""
+    },
+    {
+      "name": "Dukungan TV streaming",
+      "group": "Fitur",
+      "data_type": "boolean",
+      "unit": null,
+      "values": {
+        "4": 1,
+        "6": 1
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": 1,
+      "note": ""
+    },
+    {
+      "name": "Aplikasi yang dicantumkan produsen",
+      "group": "Fitur",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "YouTube, YouTube Kids, WeTV",
+        "6": "YouTube, YouTube Kids, MiTube, Vidio, TikTok, WeTV"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Daftar halaman produk, bukan hasil uji layanan; ketersediaan dapat berubah mengikuti firmware."
+    },
+    {
+      "name": "Jumlah aplikasi yang dicantumkan",
+      "group": "Fitur",
+      "data_type": "numeric",
+      "unit": "aplikasi",
+      "values": {
+        "4": 3,
+        "6": 6
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": 6,
+      "note": "Skor kelengkapan daftar halaman, tidak menilai mutu layanan atau menjamin aplikasi berjalan."
+    },
+    {
+      "name": "EPG, teleteks, dan takarir",
+      "group": "Fitur",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "Didukung",
+        "6": null
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Tidak dicantumkan pada halaman FM; tidak dihitung sebagai kekurangan."
+    },
+    {
+      "name": "Tema menu",
+      "group": "Fitur",
+      "data_type": "numeric",
+      "unit": "tema",
+      "values": {
+        "4": 1,
+        "6": 5
+      },
+      "sources": {
+        "4": "https://api.matrixparabola.com/assets/html/katalog_doc_69f81f76c62c1.html",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Kuning dari katalog seri; pilihan tampilan tidak diberi skor kualitas."
+    },
+    {
+      "name": "Radio FM",
+      "group": "Fitur",
+      "data_type": "boolean",
+      "unit": null,
+      "values": {
+        "4": null,
+        "6": 1
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Kuning tidak dicantumkan; bukan berarti pasti tidak mendukung. Tidak dibandingkan."
+    },
+    {
+      "name": "Sistem siaran pada halaman produk",
+      "group": "Teknologi",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "DVB-T2",
+        "6": "DVB-T2"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "DVB-C pada katalog seri Merah belum dipastikan untuk varian Radio FM."
+    },
+    {
+      "name": "Pembaruan perangkat lunak",
+      "group": "Fitur",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "Melalui media USB",
+        "6": null
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Katalog Kuning menyebut jaringan juga; utamakan halaman varian dan konfirmasi firmware."
+    },
+    {
+      "name": "Ukuran perangkat",
+      "group": "Teknologi",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "16 × 10 × 6 cm",
+        "6": null
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": ""
+    },
+    {
+      "name": "Ukuran kemasan",
+      "group": "Teknologi",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": null,
+        "6": "28 × 26 × 17 cm"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Ukuran kemasan tidak dibandingkan dengan ukuran perangkat."
+    },
+    {
+      "name": "Berat sesuai halaman produsen",
+      "group": "Teknologi",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "364 (satuan tidak dicantumkan)",
+        "6": "500 g"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Tidak diberi skor; satuan dan cakupan berat Kuning perlu dipastikan."
+    },
+    {
+      "name": "Isi paket",
+      "group": "Fitur",
+      "data_type": "text",
+      "unit": null,
+      "values": {
+        "4": "STB, remote, kartu garansi, kabel RCA",
+        "6": "STB, remote, dua baterai, kartu garansi, kabel RCA"
+      },
+      "sources": {
+        "4": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+        "6": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital"
+      },
+      "reference": null,
+      "note": "Kelengkapan paket tidak diberi skor."
+    }
+  ]
+}

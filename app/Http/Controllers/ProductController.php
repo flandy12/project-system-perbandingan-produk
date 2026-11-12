@@ -4,18 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductSpecification;
 use App\Models\SpecificationGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with(['category', 'finalScore'])
+        $products = Product::with(['category', 'finalScore', 'specifications'])
             ->latest()
             ->paginate(15);
         $categories = Category::all();
@@ -37,13 +35,21 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:20000',
+            'comparison_type' => 'nullable|in:terrestrial,satellite,combo,android',
+            'status' => 'sometimes|in:active,disable',
+            'official_url' => 'nullable|url:http,https|max:2048',
+            'price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'category_id' => 'required|exists:categories,id',
             'specifications' => 'array',
-            'specifications.*' => 'nullable|string',
-            'production_year' => 'nullable|integer|between:1900,' . date('Y'),
+            'specifications.*' => 'nullable|string|max:255',
+            'proofs' => 'sometimes|array',
+            'proofs.*.url' => 'nullable|url:http,https|max:2048',
+            'proofs.*.type' => 'nullable|in:official,retailer,marketplace',
+            'proofs.*.confirmed' => 'nullable|boolean',
+            'production_year' => 'nullable|integer|between:1900,'.date('Y'),
         ]);
 
         DB::transaction(function () use ($request, $validated) {
@@ -56,26 +62,19 @@ class ProductController extends Controller
 
             $product = Product::create([
                 'title' => $validated['title'],
-                'price' => $validated['price'],
+                'description' => app(\App\Services\SafeProductHtml::class)->clean($validated['description'] ?? ''),
+                'comparison_type' => $validated['comparison_type'] ?? null,
+                'official_url' => $validated['official_url'] ?? null,
+                'price' => $validated['price'] ?? null,
                 'stock' => $validated['stock'],
                 'category_id' => $validated['category_id'],
                 'image' => $imagePath,
-                'production_year' => $validated['production_year'],
-                'status' => 'disable'
+                'production_year' => $validated['production_year'] ?? null,
+                'status' => $validated['status'] ?? 'disable',
             ]);
 
             // SPECIFICATIONS
-            if (!empty($validated['specifications'])) {
-                foreach ($validated['specifications'] as $specId => $value) {
-                    if ($value !== null && $value !== '') {
-                        ProductSpecification::create([
-                            'product_id' => $product->id,
-                            'specification_id' => $specId,
-                            'value' => $value
-                        ]);
-                    }
-                }
-            }
+            app(\App\Services\SaveProductSpecifications::class)->save($product, $validated['specifications'] ?? [], $validated['proofs'] ?? [], $request->user()->id);
         });
 
         return redirect()
@@ -103,13 +102,21 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'sometimes|required|numeric|min:0',
+            'official_url' => 'nullable|url:http,https|max:2048',
+            'description' => 'nullable|string|max:20000',
+            'comparison_type' => 'sometimes|nullable|in:terrestrial,satellite,combo,android',
+            'specifications' => 'sometimes|array',
+            'specifications.*' => 'nullable|string|max:255',
+            'proofs' => 'sometimes|array',
+            'proofs.*.url' => 'nullable|url:http,https|max:2048',
+            'proofs.*.type' => 'nullable|in:official,retailer,marketplace',
+            'proofs.*.confirmed' => 'nullable|boolean',
+            'price' => 'sometimes|nullable|numeric|min:0',
             'stock' => 'sometimes|required|integer|min:0',
             'status' => 'sometimes|in:active,disable',
             'category_id' => 'sometimes|exists:categories,id',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'production_year' => 'nullable|integer|between:1900,' . date('Y'),
+            'production_year' => 'nullable|integer|between:1900,'.date('Y'),
         ]);
 
         DB::transaction(function () use ($validated, $request, $product) {
@@ -118,7 +125,8 @@ class ProductController extends Controller
             if ($request->hasFile('image')) {
 
                 if ($product->image && Storage::disk('public')->exists($product->image)) {
-                    Storage::disk('public')->delete($product->image);
+                    $oldImage = $product->image;
+                    DB::afterCommit(fn () => Storage::disk('public')->delete($oldImage));
                 }
 
                 $validated['image'] = $request->file('image')
@@ -128,11 +136,20 @@ class ProductController extends Controller
             /**
              * AUTO STATUS LOGIC
              */
-            if (array_key_exists('stock', $validated)) {
+            if (array_key_exists('stock', $validated) && ! array_key_exists('status', $validated)) {
                 $validated['status'] = $validated['stock'] > 0 ? 'active' : 'disable';
             }
 
+            $values = $validated['specifications'] ?? null;
+            $proofs = $validated['proofs'] ?? [];
+            unset($validated['specifications'], $validated['proofs']);
+            if (array_key_exists('description', $validated)) {
+                $validated['description'] = app(\App\Services\SafeProductHtml::class)->clean($validated['description'] ?? '');
+            }
             $product->update($validated);
+            if ($values !== null) {
+                app(\App\Services\SaveProductSpecifications::class)->save($product, $values, $proofs, $request->user()->id);
+            }
         });
 
         return redirect()
@@ -140,12 +157,11 @@ class ProductController extends Controller
             ->with('success', 'Product berhasil diperbarui');
     }
 
-
     public function activate(Product $product)
     {
         if ($product->finalScore === null) {
             return response()->json([
-                'message' => 'Product score not calculated'
+                'message' => 'Product score not calculated',
             ], 422);
         }
 

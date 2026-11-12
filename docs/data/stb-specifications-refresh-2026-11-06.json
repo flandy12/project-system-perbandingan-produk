@@ -1,0 +1,254 @@
+{
+  "checked_at": "2026-11-06",
+  "policy": "Pembaruan spesifikasi saja dari halaman produsen yang dibaca ulang; harga, stok, identitas, foto, data penjualan dan riwayat analisis tidak diubah. Nilai admin yang berbeda dari baseline ditahan untuk pemeriksaan.",
+  "products": [
+    {
+      "key": "apple-merah-hd",
+      "url": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-hd-stb-tv-digital",
+      "facts": [],
+      "page_reviewed": true
+    },
+    {
+      "key": "apple-android",
+      "url": "https://www.matrixparabola.com/product/matrix-apple-android-tv-box-android-10-ram-2gb-wifi-android-tv",
+      "facts": [
+        {
+          "key": "gpu",
+          "name": "GPU",
+          "group": "Teknologi",
+          "data_type": "text",
+          "unit": null,
+          "value": "G31 / OpenGL ES 3.2",
+          "reference": null,
+          "note": "Chip grafis sesuai halaman produsen; bukan nilai benchmark."
+        },
+        {
+          "key": "infrared",
+          "name": "Dukungan inframerah",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Infrared IR: Support pada halaman produsen."
+        }
+      ],
+      "page_reviewed": true
+    },
+    {
+      "key": "apple-kuning",
+      "url": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-kuning-dvbt2-hd-stb-tv-digital",
+      "facts": [
+        {
+          "key": "usb",
+          "name": "Jumlah port USB",
+          "group": "Koneksivitas",
+          "data_type": "numeric",
+          "unit": "port",
+          "value": 1,
+          "reference": 2,
+          "note": "Halaman resmi model ini menyebut 1x Front. Dicatat untuk varian halaman produk; perbedaan katalog lama dipertahankan dalam riwayat bukti."
+        },
+        {
+          "key": "cast_support",
+          "name": "Dukungan berbagi layar",
+          "group": "Koneksivitas",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": 1,
+          "note": "Deskripsi model resmi secara eksplisit menyebut mirroring. Protokol tidak dinyatakan; tidak diasumsikan MeeCast."
+        },
+        {
+          "key": "epg_support",
+          "name": "Dukungan EPG",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        },
+        {
+          "key": "teletext_support",
+          "name": "Dukungan teleteks",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        },
+        {
+          "key": "subtitle_support",
+          "name": "Dukungan takarir",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        }
+      ],
+      "page_reviewed": true
+    },
+    {
+      "key": "apple-dvb2ip",
+      "url": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2ip-stb-tv-digital",
+      "facts": [
+        {
+          "key": "epg_support",
+          "name": "Dukungan EPG",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        },
+        {
+          "key": "teletext_support",
+          "name": "Dukungan teleteks",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        },
+        {
+          "key": "subtitle_support",
+          "name": "Dukungan takarir",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        }
+      ],
+      "page_reviewed": true
+    },
+    {
+      "key": "apple-merah-fm",
+      "url": "https://www.matrixparabola.com/product/matrix-set-top-box-apple-merah-dvbt2-radio-fm-stb-tv-digital",
+      "facts": [],
+      "page_reviewed": true
+    },
+    {
+      "key": "burger-mt",
+      "url": "https://www.matrixparabola.com/product/matrix-set-top-box-burger-hijau-dvb-t2-mt-stb-tv-digital",
+      "facts": [
+        {
+          "key": "epg_support",
+          "name": "Dukungan EPG",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        },
+        {
+          "key": "teletext_support",
+          "name": "Dukungan teleteks",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        },
+        {
+          "key": "subtitle_support",
+          "name": "Dukungan takarir",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        }
+      ],
+      "page_reviewed": true
+    },
+    {
+      "key": "garuda-t2",
+      "url": "https://www.matrixparabola.com/product/matrix-set-top-box-garuda-dvbt2-hd-stb-tv-digital",
+      "facts": [
+        {
+          "key": "epg_support",
+          "name": "Dukungan EPG",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        },
+        {
+          "key": "teletext_support",
+          "name": "Dukungan teleteks",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        },
+        {
+          "key": "subtitle_support",
+          "name": "Dukungan takarir",
+          "group": "Fitur",
+          "data_type": "boolean",
+          "unit": null,
+          "value": 1,
+          "reference": null,
+          "note": "Dicantumkan pada spesifikasi resmi EPG/Teletext/Subtitle; ditampilkan sebagai fakta tanpa menambah bobot skor."
+        }
+      ],
+      "page_reviewed": true
+    },
+    {
+      "key": "nex-combo-kuning",
+      "url": "https://www.mynex.co.id/receiver",
+      "facts": [
+        {
+          "key": "audio",
+          "name": "Format audio",
+          "group": "Kualitas",
+          "data_type": "text",
+          "unit": null,
+          "value": "MPEG-5 (istilah pada halaman resmi)",
+          "reference": null,
+          "note": "Istilah sumber dipertahankan; codec lain tidak disimpulkan."
+        }
+      ],
+      "page_reviewed": true
+    },
+    {
+      "key": "nex-combo-merah",
+      "url": "https://www.mynex.co.id/receiver",
+      "facts": [],
+      "page_reviewed": true
+    },
+    {
+      "key": "nex-matrix",
+      "url": "https://www.mynex.co.id/receiver",
+      "facts": [],
+      "page_reviewed": true
+    },
+    {
+      "key": "nex-kuning",
+      "url": "https://www.mynex.co.id/receiver",
+      "facts": [],
+      "page_reviewed": true
+    },
+    {
+      "key": "nex-biru",
+      "url": "https://www.mynex.co.id/receiver",
+      "facts": [],
+      "page_reviewed": true
+    }
+  ]
+}

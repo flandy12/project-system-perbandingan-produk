@@ -576,12 +576,15 @@ tests/                    # Feature test dan unit test
 
 ## Catatan Implementasi
 
-- Menu **Comment** membutuhkan permission `comment.view`, tetapi permission itu belum dibuat oleh `PermissionSeeder`. Tambahkan dan pasangkan ke role yang sesuai agar menu muncul.
-- Tombol dashboard pada navbar publik memeriksa role `admin` atau `super admin`, sedangkan seeder membuat `owner`, `admin`, dan `staff`. Role `owner` memiliki permission dashboard tetapi tombol tidak muncul sampai kondisinya diselaraskan.
-- Route CRUD dashboard dilindungi autentikasi dan verifikasi email, tetapi belum terlihat middleware permission per route. Tambahkan middleware seperti `permission:view.product` atau policy agar pembatasan sidebar tidak dapat dilewati lewat URL langsung.
+- Branch pembaruan STB membawa katalog bersumber, grafik perbandingan SVG, tautan resmi produk, impor penjualan, dan analisis K-Means.
+- Jalankan `composer install`, `npm ci`, `npm run build`, `php artisan migrate`, dan `php artisan storage:link` setelah konfigurasi lingkungan lokal selesai.
+- Jalankan `php artisan db:seed --class=SalesFoundationSeeder` pada database pengembangan untuk menyiapkan izin Admin, Owner, dan Pelanggan.
+- Database lokal pengembang tidak ikut dikirim. Pada database yang sudah memiliki katalog STB bersumber, `php artisan db:seed --class=StbSpecificationsRefreshSeeder` menerapkan pembaruan spesifikasi. Seeder katalog penuh memakai ID produk lama; periksa pemetaan ID sebelum menggunakannya.
+- Foto referensi katalog dan template impor kosong disertakan. Akun, riwayat analisis, ulasan, dan laporan penjualan dari database lokal tidak disalin.
+- Pengujian: `php artisan test`. Lihat [catatan pembaruan spesifikasi](docs/PEMBARUAN-SPESIFIKASI-PERBANDINGAN-2026-11-06.md) dan [panduan impor penjualan](docs/FONDASI-DATA-DAN-IMPOR-PENJUALAN.md).
 - Controller dan route skor spesifikasi/skor akhir tersedia, tetapi tidak ditampilkan pada sidebar baru. Selaraskan alurnya jika akan dipakai operator.
 - Gambar memakai disk `public`; jalankan `php artisan storage:link` agar dapat ditampilkan.
-- Chart.js dimuat dari CDN. Lingkungan tanpa internet perlu menyediakannya secara lokal.
+- Grafik perbandingan dan analisis STB dirender sebagai SVG. Grafik kunjungan dashboard masih memakai Chart.js dari CDN.
 
 ## Lisensi
 

@@ -1,8 +1,8 @@
-<div x-data="{ sidebarOpen: true }" class="flex min-h-screen bg-slate-50">
+<div x-data="{ sidebarOpen: true }" :class="cmsMenu ? 'block' : 'hidden md:block'" class="fixed md:static inset-y-0 left-0 z-50 md:z-auto shrink-0 bg-slate-50">
 
     <!-- SIDEBAR -->
     <aside :class="sidebarOpen ? 'w-72' : 'w-20'"
-        class="bg-white border-r border-slate-200 shadow-sm transition-all duration-300 flex flex-col">
+        class="bg-white border-r border-slate-200 shadow-sm transition-all duration-300 flex flex-col h-screen sticky top-0 overflow-y-auto">
 
         <!-- HEADER -->
         <div class="h-16 border-b border-slate-200 flex items-center justify-between px-4">
@@ -86,7 +86,7 @@
                 @endcan
 
                 {{-- Comment --}}
-                @can('comment.view')
+                @can('view.comment')
                     <a href="{{ route('comments.index') }}"
                         class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-sky-50 hover:text-sky-600 transition">
 
@@ -228,8 +228,12 @@
                     @can('view.product.sales')
                         <a href="{{ route('product-sales-stats.index') }}"
                             class="block px-4 py-2 rounded-lg hover:bg-slate-100">
-                            <span x-show="sidebarOpen">Sales Statistics</span>
+                            <span x-show="sidebarOpen">Penjualan Bulanan</span>
                         </a>
+                        @can('view.stb.analysis')
+                        <a href="{{ route('stb-analysis.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100"><span x-show="sidebarOpen">Analisis K-Means STB</span></a>
+                        @endcan
+                        <a href="{{ route('sales-import.index') }}" class="block px-4 py-2 rounded-lg hover:bg-slate-100"><span x-show="sidebarOpen">Kesiapan Data &amp; Impor</span></a>
                     @endcan
 
                 </nav>
@@ -253,7 +257,7 @@
                         </div>
 
                         <div class="text-xs text-slate-500">
-                            Administrator
+                        {{ auth()->user()->hasRole('owner') ? 'Owner' : (auth()->user()->hasRole('admin') ? 'Admin' : 'Pengelola') }}
                         </div>
 
                     </div>
